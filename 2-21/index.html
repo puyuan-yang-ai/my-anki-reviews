@@ -1,0 +1,480 @@
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Export Notes by xxhk.org</title>
+<style>
+
+body { font-family: Arial, sans-serif; }
+.card { border: 2px solid #000; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+img {
+max-width: 100%;
+height: auto;
+border: 1px solid lightgray;
+border-radius: 10px;
+display: inline-block;
+margin: 10px 0px;
+}
+.separator { border-top: 1px dashed #000; margin: 10px 0; }
+.tags { background-color: lightgray; padding: 5px 10px; margin-bottom: 10px; border-radius: 5px; display: inline-block; }
+.footer {
+text-align: center;
+color: grey;
+margin-top: 20px;
+padding: 10px;
+}
+
+.video-container {
+margin: 10px 0;
+}
+.video-placeholder {
+position: relative;
+cursor: pointer;
+}
+.play-button {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 68px;
+height: 48px;
+background-color: rgba(0, 0, 0, 0.7);
+border-radius: 14px;
+cursor: pointer;
+}
+.play-button::before {
+content: '';
+position: absolute;
+top: 50%;
+left: 55%;
+transform: translate(-50%, -50%);
+border-style: solid;
+border-width: 12px 0 12px 20px;
+border-color: transparent transparent transparent white;
+}
+.play-button:hover {
+background-color: red;
+}
+
+</style>
+
+</head>
+<body>
+<div id="cards-container">
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">查询改写主要目的是优化后续的什么以及精准的将用户的什么转换成更加适合什么的形式。&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">优化检索效果，通常需要快速、精准地将用户输入转换为更适合检索的查询形式</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><ol><li><div>用户输入：<code>“最新房产税政策”</code></div></li><li><div>查询改写模块（小型7B Llama2）将其改写成什么？</div></li></ol></div>
+<div class="separator"></div>
+<div class="field_1">“2025年最新商业地产税收政策有哪些变化？”</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div><div>查询改写模块快速、精准地优化什么提高什么相关性？&nbsp;</div></div></div>
+<div class="separator"></div>
+<div class="field_1">优化用户输入，提高检索相关性。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div><div>主流的 Query 改写方式，什么时候使用单一改写？什么时候使用多查询生成。&nbsp;</div></div></div>
+<div class="separator"></div>
+<div class="field_1">在简单场景下倾向于单一改写，<br>而在复杂或模糊场景下更倾向于多查询生成</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div><div>我的系统里面Query 改写方式，是进行单一改写还是生成多查询？以及他们的分别的检索后的返回文档的数量是多少？&nbsp;</div></div>【每种查询的每种检索的返回数量。】</div>
+<div class="separator"></div>
+<div class="field_1">我的策略是生成多查询，也就是一个主查询，再加上两个扩展查询。<br>其中主查询的话，经过文本，语义，图谱检索后的数量分别是100,100,50，而扩展查询经过三种检索之后，得到的数量是分别是30,30,20。<br>&nbsp;所以一个主查询再加两个扩展查询他们总体返回的文档的数量不超过500，大概在400多。&nbsp;&nbsp;</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div><div>我的系统里面Query 改写方式，将一个query改写成三个query，然后他们最终分别会检索出不同的结果，请问&nbsp; 将它们进行排序之前需要进行什么处理？&nbsp;</div></div></div>
+<div class="separator"></div>
+<div class="field_1">先进行去重处理。 因为很有可能检索到同样的内容。&nbsp;</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>房地产培训系统查询Query 改写，提示词应该是什么样的？&nbsp;</div> 【你是个什么？对什么改写，背景，这是一个什么？然后涵盖什么内容？改写要求是什么，返回的格式是什么？事例是什么？】</div>
+<div class="separator"></div>
+<div class="field_1">f"""你是一个专业的房地产培训系统查询专家。请对以下用户查询进行专业化改写。<br><br>背景：这是一个面向房地产公司内部员工的培训系统，涵盖法律法规、房产知识、销售技巧和话术等内容。<br><br>用户查询：{query}<br><br>请按照以下要求改写：<br>1. 返回1个主查询（最符合原意）和2个扩展查询（相关方向）<br>2. 使用房地产行业标准术语<br>3. 确保改写后的查询涵盖必要的上下文<br>4. 每个查询控制在20字以内<br><br>输出格式：<br>主查询：[主查询内容]<br>扩展查询1：[扩展查询1内容]<br>扩展查询2：[扩展查询2内容]<br><br>示例：<br>用户查询：'新人怎么卖房子'<br>主查询：'房地产销售新人入职培训要点'<br>扩展查询1：'房产销售基础话术技巧'<br>扩展查询2：'新手置业顾问客户开发方法'<br>"""</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>房地产培训系统 最终回答生成，提示词应该是什么样的？&nbsp;</div>【角色，任务，背景，嵌入 ，要求，格式 】</div>
+<div class="separator"></div>
+<div class="field_1">&nbsp;f"""你是一个专业的房地产培训讲师。请基于提供的上下文信息，回答用户的问题。<br><br>背景：面向房地产公司内部员工的培训系统<br><br>问题：{query}<br><br>参考上下文：<br>{context}<br><br>回答要求：<br>1. 使用专业但易懂的语言<br>2. 结构清晰，分点说明<br>3. 适当添加实际案例<br>4. 如涉及法规政策，需注明来源<br>5. 如果是销售话术，请给出具体对话示例<br><br>输出格式：<br>[核心回答]<br><br>[补充说明（如有）]<br><br>[实际案例/对话示例（如适用）]<br><br>[相关提醒（如有）]<br>"""</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>用户的问题会先经过大模型进行改写。为什么用大模型呢？</div> 【实现的角度和维护的角度。】</div>
+<div class="separator"></div>
+<div class="field_1">因为大模型理解能力强，可以很好地理解用户意图，而且实现起来比规则基础的改写更简单，维护成本也更低。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>让大模型返回3个改写后的query，叫什么名字以及分别什么意思？</div> 【紧扣什么，补充什么？】</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>1个主查询：这个是最核心的，紧扣用户原始意图</li><li>2个扩展查询：从不同角度补充相关信息</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">RAG系统，比如用户问'怎么卖房子'，改写后的结果应该是什么？&nbsp; </div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>主查询可能是'房地产销售技巧要点'</li><li>扩展查询可能是'房产销售基础技巧'和'新手置业顾问客户开发方法'</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">RAG系统，query改写<span style="color: rgb(31, 35, 40); background-color: rgb(255, 255, 255);">为什么要返回3个而不是更多呢？</span> 【三个查询能够很好的平衡什么和什么？】</div>
+<div class="separator"></div>
+<div class="field_1">如果是单一查询，那么查询的结果可能不够全面，<br>如果是太多的查询会导致查询过的无关结果，引入噪声，而且的话效率低下。<br><span style="color: rgb(31, 35, 40); background-color: rgb(255, 255, 255);">因为实践发现，3个查询能够很好地平衡检索的全面性和系统性能/效率。太多的查询反而会带来噪音，影响最终结果的质量。</span></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">RAG系统，<br>改写后的query会串行还是并行地去做几种检索？</div>
+<div class="separator"></div>
+<div class="field_1">并行地去做三种检索，文本，语义和图谱检索。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">RAG系统，<br>改写后的query会并行地去做三种检索，分别是什么以及是什么作用？&nbsp; 【什么匹配，什么度，以及在图谱里面找到相关的什么和什么。】</div>
+<div class="separator"></div>
+<div class="field_1"><ol><li>文本检索：找最基础的关键词匹配</li><li>语义检索：通过向量相似度找相关内容</li><li>图谱检索：通过知识图谱找到相关的知识节点和关系</li></ol></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">RAG系统，<br>文本检索 他的目的是什么？&nbsp;【进行什么匹配？】</div>
+<div class="separator"></div>
+<div class="field_1">找最基础的关键词匹配。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">RAG系统，<br>语义检索的目的是什么？&nbsp;【通过什么来找到相关内容？】</div>
+<div class="separator"></div>
+<div class="field_1">通过向量相似度找相关内容。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">RAG系统，<br>图谱检索的目的是什么？&nbsp;【通过图谱找到相关的什么和什么？】</div>
+<div class="separator"></div>
+<div class="field_1">通过知识图谱找到相关的知识节点和关系。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">RAG系统，<br>文本检索，语义检索，图谱检索这3种为什么是互补的？&nbsp; 【什么性和什么性和什么化知识？】</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>文本检索确保准确性</li><li>语义检索提供相关性</li><li>图谱检索补充结构化知识</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的Query改写，需要考虑哪三个方面？【用词呀，整体呀，包含呀。】</div>
+<div class="separator"></div>
+<div class="field_1">分别是专业性,结构化和完整性。&nbsp;</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的Query改写，需要考虑专业性，结构化和完整性 三个方面，其中，专业性是什么意思？【将什么化表达转成什么用语？】</div>
+<div class="separator"></div>
+<div class="field_1">因为房地产行业有很多专业术语，我们需要把用户的口语化表达转成标准专业用语。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的Query改写，需要考虑专业性，结构化和完整性 三个方面，其中，结构化是什么意思？【将什么问题转换成什么样的查询？】</div>
+<div class="separator"></div>
+<div class="field_1">要把用户零散的问题转成更有条理的查询。比如用户问'合同有什么要注意的'，我们可以把它拆分为'销售合同关键条款'、'合同签订流程'、'风险防控要点'等具体方面。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的Query改写，需要考虑专业性，结构化和完整性 三个方面，其中，完整性是什么意思？【要考虑到什么和什么，适当的扩展查询的什么？把必要的信息都怎么样？】</div>
+<div class="separator"></div>
+<div class="field_1">因为培训系统要考虑到相关法规和公司制度，所以在改写时要适当扩展查询范围，把相关的必要信息都覆盖到。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的RAG，用户进行改写，然后进行检索，检索以后进入到重排，这整个流程的流程图是什么？&nbsp; 【用户输入进入哪个模块，产生什么，分别是什么，然后进入什么样检索?】</div>
+<div class="separator"></div>
+<div class="field_1">将用户的输入进行改写模块，产生三个查询，分别是主查询和两个扩展查询。<br>每个查询同时进行三种方式的混合检索，文本检索，语义检索，图库检索。<br>最终这些所有检索到的内容进行去重。<br><img src="images/paste-62fd39f60444e7a8c0f79db3781d5d50a87aa104.jpg"></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">房地产培训系统查询Query 改写，提示词应该是什么样的？【应该包含哪些内容？】</div>
+<div class="separator"></div>
+<div class="field_1">角色，你是一个房地产公司查询系统专家。<br>任务，请帮我针对用户的输入来进行改写。<br>要求，返回一个主查询和两个扩展查询，主查询是贴合用户的核心需求，扩展查询的是扩展用户的意图。<br>返回格式，……<br>示例，……</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的RAG，从用户输入问题开始到形成最终的prompt提示词，总体的过程是什么？ 【具体细节】</div>
+<div class="separator"></div>
+<div class="field_1"><ol><li>用户输入问题以后。 进入query改写模块后，会生成一个主查询和两个扩展查询。&nbsp;</li><li>查询经过嵌入模型向量化以后， 进行文本检索跟语义检索。 然后查询使用实体识别以后进行图谱检索。混合检索一共产生500条结果。 先对500条混<span style="background-color: rgb(243, 243, 243);">合结果进行初步排序</span><span style="background-color: rgb(243, 243, 243);">，选出top 200</span></li><li>然后是重排模块，粗排筛选出100条，精排筛选出10条。</li><li>对筛选到的10条内容进行上下文构建，采用了结构化的信息组织策略来构建上下文Context。</li><li>最后这个构建的结构化的context跟用户的原始输入query拼接到prompt模板中，形成最终的prompt提示词。&nbsp;&nbsp;</li></ol></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的RAG，<br>后续的需要进行的优化点有哪些？【混合检索以及上下文构建这两个阶段。 】</div>
+<div class="separator"></div>
+<div class="field_1">这混合检索里面，3种检索方式应该是可以动态的，比如事实类的查询，那么图谱检索的权重应该更大。对于观点类的问题，那么语义检索的权重应该更大。&nbsp;&nbsp;<br>利用检索到的内容进行上下文构建阶段，我们还会添加元信息标记，比如信息的时效性、可信度等，这些都会作为提示信息注入到最终的prompt中，帮助大模型生成更准确的回答。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的RAG，<br>排序里面的粗排考虑到哪些信息？【三方面】</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>内容的时效性（最新政策优先）</li><li>来源可靠性（官方信息优先）</li><li>内容完整性（完整流程优先）</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的RAG，<br>精排和粗排这两个阶段，分别的重点是什么？</div>
+<div class="separator"></div>
+<div class="field_1">粗排的重点就是快速的过滤掉无关的噪音，<br>精排阶段的重点是进行复杂的相似度计算。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">对于房地产培训系统的RAG，<br>Milvus使用哪个索引？</div>
+<div class="separator"></div>
+<div class="field_1">HNSW。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">最大输入 token 数是否包含了生成输出的 token 数？</div>
+<div class="separator"></div>
+<div class="field_1">是的。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">为什么最大输入 token 数包含生成输出？</div>
+<div class="separator"></div>
+<div class="field_1"><div>LLaMA 等语言模型是基于自回归机制工作的，这意味着它们会逐步生成每个 token，而每个新生成的 token 会被当作输入，加入到上下文中，供模型预测下一个 token。</div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>假设你的 prompt 是 1000 个 token，模型在生成第一个输出 token 时，它的输入是什么？<br><div>当第一个输出 token 被生成后，模型的输入变成了 1001 个 token，这是为什么呢？</div></div></div>
+<div class="separator"></div>
+<div class="field_1">是这 1000 个 token。<br>这个 token 会被加入到上下文中，成为新的输入的一部分。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>对于大模型来说，随着更多 token 被生成，输入上下文会怎么样变化？ 直到怎么样？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><div>输入上下文会不断增长，直到达到最大上下文长度（如&nbsp;2048）。</div><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>为什么最大输入 token 数需要同时包括 prompt 和生成的内容。</div></div>
+<div class="separator"></div>
+<div class="field_1">生成的输出实际上是动态加入到模型的输入中的。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>最大输入 token 数更准确地描述是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">上下文长度，即模型在一次推理中能够“记住”的所有内容（包括提示和生成）。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>上下文长度，是什么意思？</div></div>
+<div class="separator"></div>
+<div class="field_1">即模型在一次推理中能够“记住”的所有内容（包括提示和生成）。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>最大输入 token 数是 2048：</div><ul><li><div>如果你的 prompt 是 2000 个 token，那么输出应该是多少？</div></li></ul></div>
+<div class="separator"></div>
+<div class="field_1"><span style="color: oklch(0.304 0.04 213.681); background-color: oklch(0.99 0.004 106.471);">最多只能生成 48 个 token，因为 prompt 和输出加起来不能超过 2048。</span></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0">“最大输入 token 数”<div>名字听起来像只针对“输入”，但实际上它指的是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">模型一次性处理的所有内容。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>最大输入 token 数包含 prompt 和生成输出，是因为什么？</div></div>
+<div class="separator"></div>
+<div class="field_1"><div>模型需要将每一步生成的内容纳入上下文，以继续预测下一个 token。<br></div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>模型的上下文长度（即最大输入 token 数）包括了哪两个部分？</div></div>
+<div class="separator"></div>
+<div class="field_1">&nbsp;输入提示（prompt）&nbsp;和&nbsp;生成输出（completion）&nbsp;的总和。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>LLaMA 1 和 LLaMA 2 他们分别的上下文窗口分别是多少？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">LLaMA 1 ：<strong>2048<br></strong>LLaMA 2：4096</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>LLaMA 1 和 LLaMA 2 他们分别的嵌入维度分别是多少？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">LLaMA 1<div><ul><li>对于所有模型版本（7B、13B、33B 和 65B），Token 的嵌入维度为&nbsp;4096.</li></ul></div>LLaMA 2<div>Token 的嵌入维度根据模型大小有所不同：</div><div><ul><li>7B 模型：嵌入维度为&nbsp;4096.</li><li>65B 模型：嵌入维度为&nbsp;8192.</li></ul></div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>LLaMA 1&nbsp; 上下窗口是多大？以及嵌入维度是多少？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">上下窗口: 2048,<br>嵌入维度:&nbsp;4096.</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>LLaMA 1&nbsp; 上下窗口是2048，如果上下文长度为 2048 tokens，建议将 prompt 控制在 多少作用？</div></div>
+<div class="separator"></div>
+<div class="field_1">1500-1800 tokens 左右。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>如果输入的 prompt 超过了上下文长度上限（例如超过 2048 tokens），模型通常会怎么样？这种行为可能导致什么问题?</div></div>
+<div class="separator"></div>
+<div class="field_1">自动截断超出的部分，只保留最后的 2048 tokens。<br>导致前面的重要信息丢失，因此需要注意输入内容的长度管理。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>最大输入 token 数就是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">模型能够一次性处理的最大的上下文长度。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>最大输入 token 数包括什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">包括输入的提示（prompt）和生成的输出（completion）中的所有 token 总数。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>LLaMA 1&nbsp;</div><div>最大输入 token 数，隐藏维度，注意力头数，激活函数，分别是什么？<br></div></div>
+<div class="separator"></div>
+<div class="field_1">最大输入 token 数为 2048，隐藏维度是4096，注意力头数是32 个，激活函数是SwiGLU 。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>LLaMA 1&nbsp;</div><div>基于 Transformer 的自回归解码器架构，与 GPT 类似，但有以下改进，改进是什么？<br></div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li><div>使用 RMSNorm 替代传统的 LayerNorm。</div></li><li><div>使用 SwiGLU 激活函数替代&nbsp;GeLU。</div></li><li><div>应用了旋转位置嵌入 (RoPE)，以增强位置编码能力</div></li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>模型在生成文本时，是通过不断预测下一个token来完成的。每预测出一个新token，它就是否会被加入到上下文中？&nbsp;<br></div></div>
+<div class="separator"></div>
+<div class="field_1">会的。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>模型有最大的上下文的限制，比如说2048。检索到的十个文档，作为上下文拼接到模板构成提示prompt，而模型有上下文限制，会超出这个限制。 体来说，我们在实践中的做法应该是什么呢？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">为系统提示词和查询预留固定空间，<br>如果我们期望生成500个tokens的回答，那么用于prompt的部分就不能超过1548个tokens。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>上下文构建这个环节的优化是什么？【3个】</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>信息的去重和合并，然后根据余弦相似度将内容进行去重，再将互补的信息进行合并。&nbsp;&nbsp;</li><li>考虑到了模型的上下文窗口限制是2048，给prompt预留1000个token，对每条信息进行token计数，计算前N个信息的token总数，如果正好大于1000，那么只保留N-1条信息。</li><li>我们把精排得到的10条信息按照不同的维度进行分类，比如事实信息价格信息位置信息等。&nbsp;</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>&nbsp;检索阶段的融合过程是什么样？</div></div>
+<div class="separator"></div>
+<div class="field_1"># 1. 分数归一化 <br># 2. 权重分配 <br># 3. 去重处理 <br># 4. 排序整合</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>检索融合以及上下文构建这两个阶段他们的难点分别是什么？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">检索融合：处理不同格式、不同分数体系，以及平衡他们的权重。&nbsp;<br>上下文构建：提取关键信息并合理组织。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>RAG在项目里面的实际的优化点有哪些？</div></div>
+<div class="separator"></div>
+<div class="field_1"><ol><li>Query改写，</li><li>向量嵌入，</li><li>混合检索，</li><li>重排序，</li><li>上下文构建。&nbsp;</li></ol><img src="images/paste-ccd4f939ad6ee4426e194cfb43fbf4d4bcd4b608.jpg"><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>RAG这个项目的输入是什么？请输入开始解释一下接下来发生的过程。</div></div>
+<div class="separator"></div>
+<div class="field_1">输入是用户查询，就比如说最近的房产税是怎么样的？ <br>它就会改写成2025年最新的商业房产税收是什么样的？这个作为主查询，还有两个相关的扩展查询。&nbsp; <br>然后这三个查询都会并行的经过混合检索，也就是同时进行文本，语义，图谱检索。&nbsp;</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>RAG这个项目里面，</div><div>上下文构建模块和 答案生成模块，分别在输入和输出是什么？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><ol><li><strong>上下文构建模块</strong></li></ol><ul><li>输入:TOP 10排序结果</li><li>输出:结构化的上下文信息</li></ul><div><ol><li><strong>答案生成模块</strong></li></ol><ul><li>输入:原始查询 + 结构化上下文 构建成的prompt提示词</li><li>输出:生成的答案文本</li></ul></div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>RAG这个项目里面，</div><div>混合检索模块以及混合检索模块，分别在输入和输出是什么？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><div><ol dir="auto" start="3" style="box-sizing: border-box; padding-left: 2em; margin-top: 0px; margin-bottom: var(--base-size-16); color: rgb(31, 35, 40); background-color: rgb(255, 255, 255);"><li style="box-sizing: border-box;"><span style="box-sizing: border-box; font-weight: var(--base-text-weight-semibold, 600);">混合检索模块</span></li></ol><ul dir="auto" style="box-sizing: border-box; padding-left: 2em; margin-top: 0px; margin-bottom: var(--base-size-16); color: rgb(31, 35, 40); background-color: rgb(255, 255, 255);"><li style="box-sizing: border-box;">输入:改写后的查询，嵌入成向量表示</li><li style="box-sizing: border-box; margin-top: 0.25em;">输出:从多个源检索到的候选结果(500条)</li></ul><div><ol><li><strong>重排序模块</strong></li></ol><ul><li>输入:500条候选结果</li><li>输出:经过粗排和精排后的TOP 10结果</li></ul></div></div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>FastAPI vs Flask 对比，具体来说好在哪里？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li><b><span style="color: rgb(255, 0, 127);">性能</span></b>比Flask更好</li><li>原生支持<b><span style="color: rgb(255, 0, 127);">异步</span></b>处理，特别适合RAG系统的长时间运算</li><li><b><span style="color: rgb(255, 0, 127);">并发</span></b>处理能力更强</li><li>FastAPI自带<b><span style="color: rgb(255, 0, 127);">API文档</span></b>（<span style="color: rgb(255, 0, 127);"><b>Swagger</b></span>/ReDoc）</li><li><b><span style="color: rgb(255, 0, 127);">类型提示</span></b>支持更好</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>在实际项目中，FastAPI已经成为Python后端API开发的主流选择，特别是对于需要什么样的现代应用？</div></div>
+<div class="separator"></div>
+<div class="field_1">处理异步操作和高并发的现代应用。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>在实际RAG项目中，</div><div>构建context的时候构建什么样的context。&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">结构化context。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>在实际RAG项目中，</div><div>利用检索到的十条文档构建结构化的context ，提示词是什么？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><pre>请将以下检索结果整理成结构化的上下文信息： <br></pre><pre><span style="color: var(--color-prettylights-syntax-string);">    1. 按主题分类组织信息</span>
+<span style="color: var(--color-prettylights-syntax-string);">    2. 使用要点符号列出关键信息</span>
+<span style="color: var(--color-prettylights-syntax-string);">    3. 保留信息来源</span>
+<span style="color: var(--color-prettylights-syntax-string);">    4. 去除重复信息</span>
+<span style="color: var(--color-prettylights-syntax-string);">    5. 按重要性排序</span></pre></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-21</div>
+<div class="field_0"><div>在实际RAG项目中，</div><div>利用检索到的十条文档信息如下，</div><div># 输入的检索结果示例<br>search_results = [<br>&nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'content': 'ChatGPT发布4.0版本，推理能力提升50%',<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'source': 'OpenAI博客',<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'timestamp': '2024-03-01'<br>&nbsp;&nbsp;&nbsp; },<br>&nbsp;&nbsp;&nbsp; {<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'content': '用户反馈新版本响应速度提升明显',<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'source': '用户论坛',<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 'timestamp': '2024-03-02'<br>&nbsp;&nbsp;&nbsp; }<br>]<br># 输出的结构化context 是什么样的？<br></div></div>
+<div class="separator"></div>
+<div class="field_1"># 输出的结构化context<br>structured_context = """<br>【技术更新】<br>• ChatGPT 4.0版本发布<br>• 推理能力提升50%<br>来源：OpenAI博客 (2024-03-01)<br><br>【用户反馈】<br>• 响应速度显著提升<br>• 用户体验改善<br>来源：用户论坛 (2024-03-02)<br>"""</div>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+const container = e.target.closest('.video-container');
+if (!container) return;
+
+const placeholder = container.querySelector('.video-placeholder');
+if (!placeholder) return;
+
+const videoId = container.dataset.videoId;
+const startParam = container.dataset.start || '';
+
+const iframe = document.createElement('iframe');
+iframe.width = '100%';
+iframe.height = '100%';
+iframe.src = `https://www.youtube.com/embed/${videoId}?${startParam.slice(1)}`;
+iframe.title = 'YouTube video player';
+iframe.frameBorder = '0';
+iframe.style.position = 'absolute';
+iframe.style.top = '0';
+iframe.style.left = '0';
+iframe.style.borderRadius = '15px';
+iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+iframe.allowFullscreen = true;
+
+placeholder.innerHTML = '';
+placeholder.appendChild(iframe);
+});
+</script>
+
+</div>
+<div class="footer">Made by <a href="https://xxhk.org">Export Notes - XXHK</a></div>
+</body>
+</html>
+
