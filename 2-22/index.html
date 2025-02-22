@@ -1,0 +1,529 @@
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Export Notes by xxhk.org</title>
+<style>
+
+body { font-family: Arial, sans-serif; }
+.card { border: 2px solid #000; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+img {
+max-width: 100%;
+height: auto;
+border: 1px solid lightgray;
+border-radius: 10px;
+display: inline-block;
+margin: 10px 0px;
+}
+.separator { border-top: 1px dashed #000; margin: 10px 0; }
+.tags { background-color: lightgray; padding: 5px 10px; margin-bottom: 10px; border-radius: 5px; display: inline-block; }
+.footer {
+text-align: center;
+color: grey;
+margin-top: 20px;
+padding: 10px;
+}
+
+.video-container {
+margin: 10px 0;
+}
+.video-placeholder {
+position: relative;
+cursor: pointer;
+}
+.play-button {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 68px;
+height: 48px;
+background-color: rgba(0, 0, 0, 0.7);
+border-radius: 14px;
+cursor: pointer;
+}
+.play-button::before {
+content: '';
+position: absolute;
+top: 50%;
+left: 55%;
+transform: translate(-50%, -50%);
+border-style: solid;
+border-width: 12px 0 12px 20px;
+border-color: transparent transparent transparent white;
+}
+.play-button:hover {
+background-color: red;
+}
+
+</style>
+
+</head>
+<body>
+<div id="cards-container">
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25（Best Matching 25）是一个对什么进行打分的算法？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">BM25（Best Matching 25）是一个经典的信息<b><span style="color: rgb(255, 0, 127);">检索相关性打分</span></b>算法，是对传统<span style="color: rgb(255, 0, 127);"><b>TF-IDF</b></span>的改进版本</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25 他的核心思想是通过哪三个要素来计算什么和什么的相关性得分。&nbsp; &nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">核心思想是通过文档中词项的频率（TF）、反向文档频率（IDF）以及文档长度归一化三个要素来计算文档与查询的相关性得分。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25相比TF-IDF的主要改进在于哪里?</div>
+<div class="separator"></div>
+<div class="field_1"><ol><li>考虑了文档长度归一化</li><li>对词频进行了上限控制，避免高频词主导整个得分</li></ol></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25相比TF-IDF的主要改进里面，考虑到了文档长度的影响，是什么意思？</div>
+<div class="separator"></div>
+<div class="field_1">一个词在长文档里出现10次和在短文档里出现10次，显然在短文档里的重要性更大，BM25就能很好地处理这个问题。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25相比TF-IDF的主要改进里面，词频做了一个上限处理，是什么意思？</div>
+<div class="separator"></div>
+<div class="field_1">一个词出现得太多次，分数也不会无限增加，这样可以避免一些常用词霸占了整个排序。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">QLoRA&nbsp; 英文的全称是什么？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">Quantized Low-Rank Adaptation</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">QLoRA&nbsp; 这个技术结合了哪两个方法的优势？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">量化和LoRA两种方法的优势。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>LoRA适配器 仅训练什么，保持什么冻结，然后显著减少什么？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>仅训练低秩适配矩阵</li><li>保持基础模型参数冻结</li><li>显著减少可训练参数数量</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>QLoRA&nbsp; 引入了分页优化器，是什么意思，它的作用是什么？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>引入了基于分页的优化器</li><li>通过在<b><span style="color: rgb(255, 0, 127);">CPU和GPU之间动态移动数据</span></b>来管理内存</li><li>允许在有限显存条件下处理更大的批次大小</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>QLoRA&nbsp; 使用什么量化格式？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">特殊的4位NormalFloat (NF4) 。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>QLoRA&nbsp; 使用4位NormalFloat (NF4) 量化格式的好处是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">在保持模型性能的同时大幅降低内存使用。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>QLoRA&nbsp; 主要解决了一个很现实的问题：是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">怎么用普通的显卡来训练大模型。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>QLoRA&nbsp; 使用的两个主要的技巧以及最终达到的效果是什么？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><div>第一个是把模型做了4位量化，就是把原来动辄几百GB的模型压缩到很小。这里用了一个特殊的4位格式，叫NF4，它在压缩的同时能很好地保持模型精度。</div><div>第二个是用了LoRA技术，就是不去改动整个模型，而是训练一些小的适配器。这有点像是给模型装了个"外挂"，非常省内存和显存。</div><div>实际效果特别惊人，比如原来需要好几张A100才能训练的模型，现在用一张RTX 4090就能搞定，而且效果基本没什么损失。</div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>QLoRA引入了一个什么，可以在CPU和GPU之间灵活调度数据</div></div>
+<div class="separator"></div>
+<div class="field_1">分页优化器。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>QLoRA引入了一个很巧妙的分页优化器，可以怎么样？</div></div>
+<div class="separator"></div>
+<div class="field_1">在CPU和GPU之间灵活调度数据</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>Query改写 的英文全称是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">Query Rewriting。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>Query改写 的目的是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">将用户的原始查询转换成更适合检索的形式。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>Query改写 的三个主要策略是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>查询<b><span style="color: rgb(255, 0, 127);">扩展</span></b>（Query Expansion），</li><li>查询<b><span style="color: rgb(255, 0, 127);">分解</span></b>（Query Decomposition），</li><li>查询<b><span style="color: rgb(255, 0, 127);">重写</span></b>方式。</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>Query改写 里面的查询扩展（Query Expansion），主要包含什么信息？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>添加同义词</li><li>扩充相关概念</li><li>增加上下文信息</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>Query改写 里面的查询分解（Query Decomposition）流程是什么？</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>将复杂问题拆分成多个子查询，</li><li>针对每个子查询单独检索，</li><li>最后合并检索结果。</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>Query改写 里面的查询重写方式，有哪3种？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>基于规则的改写：使用预定义的模板和规则</li><li>基于模型的改写：使用LLM生成更好的检索查询</li><li>混合方式：结合规则和模型的优势</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>Query改写其实就是在RAG系统中，把用户的问题"翻译"成什么？</div></div>
+<div class="separator"></div>
+<div class="field_1">更容易检索的形式。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>为什么需要进行Query改写 呢？</div></div>
+<div class="separator"></div>
+<div class="field_1">因为用户问问题的方式和我们存储的文档表达方式经常对不上。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>Query改写，举一个例子？</div></div>
+<div class="separator"></div>
+<div class="field_1"><span style="color: rgb(31, 35, 40); background-color: rgb(255, 255, 255);">&nbsp;假设用户问"苹果公司最近的财报怎么样？" 我们可能会把它改写成： "Apple Inc. 2024年第一季度财务报告 营收 利润 业绩"。</span></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">在实际工作中，我们经常会用什么来做这个Query改写，以及为什么？</div>
+<div class="separator"></div>
+<div class="field_1">使用LLM，因为它理解语义的能力比较强。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">TF-IDF 里面 TF 对应的中文和英文全称是什么？ 以及是什么含义？</div>
+<div class="separator"></div>
+<div class="field_1"><div>词频（Term Frequency, TF）&nbsp;&nbsp;</div><div>反映查询词在文档中出现的次数。&nbsp;</div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">TF-IDF 里面 IDF&nbsp;对应的中文和英文全称是什么？ 以及是什么含义？</div>
+<div class="separator"></div>
+<div class="field_1">逆文档频率（Inverse Document Frequency, IDF）<br><div>衡量查询词在整个文档集合中的稀有程度。</div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">为什么BM25引入了归一化机制？</div>
+<div class="separator"></div>
+<div class="field_1"><div>长文档可能天然包含更多查询词，避免长文档因为篇幅而获得不公平的高分。</div></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25引入了 可两个可调节参数分别是什么名称？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">可调参数&nbsp;k1&nbsp;和 b.</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25引入了 可两个可调节参数分别是可调参数&nbsp;k1 和&nbsp;b，它们的作用分别是什么？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li><div>k1：控制词频对相关性的影响程度，常取值范围为1.2到2.0。</div></li><li><div>b：控制文档长度归一化的力度，取值范围为0到1。</div></li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25 是基于“关键词频率+权重“，请问这两个部分是什么意思？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">关键词的频率，也就是TF词频的意思，<br>权重的话则是IDF逆文档频率，表示它的稀有性。 也就是越稀有，它的权重越高。&nbsp;</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25 相比于&nbsp;TF-IDF的优化是什么？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>文档长度归一化，</li><li>引入可调参数 k1&nbsp;和 b，能够更灵活地适应不同数据集和应用场景。</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">什么是文本嵌入?通过这种方式，可以捕捉什么？</div>
+<div class="separator"></div>
+<div class="field_1">文本转换成数值向量。 捕捉文本之间的语义关系，使计算机能够更好地理解和操作自然语言。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">混合检索（文本检索和语义检索）时，两种检索方式分别是在哪里进行？</div>
+<div class="separator"></div>
+<div class="field_1">他们都是在Milvus 向量数据库里面进行。&nbsp;</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">Milvus 中的集合（Collection）名称相当于传统数据库的什么？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">表名。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">BM25是否是向量？</div>
+<div class="separator"></div>
+<div class="field_1">不是的，它本质是基于关键词的排序算法。&nbsp;&nbsp;</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">传统的 BM25：它改进了谁，而且计算谁和谁之间的什么，基于什么和什么。&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">是一个改进的 TF-IDF 算法，计算文档和查询之间的相关性得分，基于词频（TF）和逆文档频率（IDF）。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">milvus 数据库里面包含三方面的信息，主键信息，向量信息和文本信息。分别对应的是什么字段？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">id: 主键字段
+<br><br>embedding: 语义向量字段
+<br>bm25_vector: BM25向量字段
+<br><br>context: 文本内容字段
+<br>metadata: 元数据字段</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">向量索引类型是什么意思？</div>
+<div class="separator"></div>
+<div class="field_1">向量数据库中用于加速相似度搜索的数据结构。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">向量索引类型 主要的有哪两种？它们的缩写和全称是什么？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">IVF_FLAT（Inverted File with Flat），<br>HNSW（Hierarchical Navigable Small World）。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">IVF_FLAT（Inverted File with Flat）<br>工作原理是什么？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>首先将向量空间划分为多个聚类中心（cluster）</li><li>对每个向量，计算它属于哪个聚类</li><li>搜索时，先找到最近的聚类，然后在聚类内部进行精确搜索</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">HNSW（Hierarchical Navigable Small World）<br>工作原理是什么？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>构建多层图结构</li><li>顶层是稀疏图，底层是密集图</li><li>搜索时从顶层开始，逐层下降寻找最近邻</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">IVF_FLAT（Inverted File with Flat）<br>Inverted File 是啥意思？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>Inverted File（倒排文件）<br></li><li>"倒排" 这个概念来自于传统的搜索引擎</li><li>就像字典的索引：先找到大类，再找具体内容</li><li>例如：找"苹果"这个词，先翻到"水果类"这个章节</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">IVF_FLAT（Inverted File with Flat）<br><span style="color: rgb(31, 35, 40); background-color: rgba(129, 139, 152, 0.12);">Flat</span>&nbsp;是啥意思？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li><code>Flat</code><span style="color: rgb(31, 35, 40); background-color: rgb(255, 255, 255);">（平面的）</span><br></li><li>表示在找到大类之后，采用穷举的方式查找</li><li>就像在书架上一本本翻看</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">IVF_FLAT（Inverted File with Flat）<br>可以理解为 什么加什么？</div>
+<div class="separator"></div>
+<div class="field_1">"分类查找 + 遍历"。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">使用在图书馆找书的例子来类比IVF_FLAT 的工作原理示意。</div>
+<div class="separator"></div>
+<div class="field_1">1. 找到最近的聚类中心（相当于找到对应书架）&nbsp;<br>2. 在该聚类中遍历所有向量（相当于在书架上一本本找）</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>HNSW（Hierarchical Navigable Small World）</div>里面的Hierarchical&nbsp;表示什么意思呀？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><ol><li><div><code>Hierarchical</code>（层次的）</div><ul><li>像金字塔一样，分成多个层次</li><li>上层数据少，下层数据多</li></ul></li></ol></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>HNSW（Hierarchical Navigable Small World）</div>里面的Navigable Small World（可导航的小世界）来自于什么理论？这个理论是什么意思？以及如何快速找到目标？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>来自于"六度分隔理论"：世界上任何两个人都可以通过最多六个人建立联系</li><li>在向量检索中，就是通过建立<b><span style="color: rgb(255, 0, 127);">"捷径"</span></b>来快速找到目标</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>HNSW（Hierarchical Navigable Small World）</div><div>类比，在城市里面找目的地。&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">1. 先坐飞机到大致区域（顶层） <br>2. 然后坐地铁到某个区（中层） <br>3. 最后步行到具体位置（底层）</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>HNSW和 IVF_FLAT ，这两种方式分别的类别是什么以及具体是什么找的。&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>IVF_FLAT 就像在图书馆找书：先找到类别，再一本本翻</li><li>HNSW 就像在城市导航：先大范围定位，再逐步精确到具体位置</li></ul><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>向量索引 给谁建立一个什么，目的是什么？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">就像是给向量数据建立的一个'目录'，目的是加快我们的搜索速度。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>向量索引 是在哪个级别创建的？而且是针对哪个字段？&nbsp;&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">向量索引是在集合（Collection）级别创建的，而且是针对特定的向量字段（Vector Field）。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>向量索引 创建时机是什么时候？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1">&nbsp;是在集合创建之后。&nbsp;</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><div>向量索引作用范围是什么样的？&nbsp;</div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>每个向量字段（Vector Field）可以有自己的索引</li><li>同一个集合中的不同向量字段可以使用不同的索引类型</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0"><pre><span style="color: var(--color-prettylights-syntax-string); font-family: Arial;">MySQL(关系型数据库)各个部分的类比是什么？        </span><br></pre><pre><span style="color: var(--color-prettylights-syntax-string);">-------------------      </span>
+<span style="color: var(--color-prettylights-syntax-string);">数据库(Database)    →     </span>
+<span style="color: var(--color-prettylights-syntax-string);">表(Table)           →     </span>
+<span style="color: var(--color-prettylights-syntax-string);">行(Row)             →     </span>
+<span style="color: var(--color-prettylights-syntax-string);">列(Column)          →     </span>
+<span style="color: var(--color-prettylights-syntax-string);">索引(Index)         →     </span>
+</pre><br></div>
+<div class="separator"></div>
+<div class="field_1"><pre><span style="color: var(--color-prettylights-syntax-string);">MySQL(关系型数据库)        Milvus(向量数据库)</span>
+<span style="color: var(--color-prettylights-syntax-string);">-------------------        -------------------</span>
+<span style="color: var(--color-prettylights-syntax-string);">数据库(Database)    →     数据库(Database)</span>
+<span style="color: var(--color-prettylights-syntax-string);">表(Table)           →     集合(Collection)</span>
+<span style="color: var(--color-prettylights-syntax-string);">行(Row)             →     实体(Entity)</span>
+<span style="color: var(--color-prettylights-syntax-string);">列(Column)          →     字段(Field)</span>
+<span style="color: var(--color-prettylights-syntax-string);">索引(Index)         →     向量索引(Vector Index)</span>
+</pre><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">MySQL 和 Milvus<br>分别数据组织形式是什么样的？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>MySQL：以表格形式组织数据</li><li>Milvus：以向量形式组织数据</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">MySQL 和 Milvus<br>分别 查询方式 是什么样的？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>MySQL：主要是精确匹配和范围查询</li><li>Milvus：主要是相似度查询</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">MySQL 和 Milvus<br>分别 索引类型 是什么样的？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>MySQL：B+树、哈希索引等</li><li>Milvus：IVF_FLAT、HNSW 等向量索引</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">MySQL 和 Milvus<br>分别&nbsp;应用场景 是什么样的？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>MySQL：结构化数据管理</li><li>Milvus：向量相似度检索</li></ul></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">讲解一下IVF_FLAT索引类型的原因？</div>
+<div class="separator"></div>
+<div class="field_1"><div>IVF_FLAT，它的原理比较好理解，就像是把一个大图书馆分成很多小房间。我们先确定要找的书大概在哪个房间，然后进去仔细找。这种方式内存占用小，速度还不错，而且我们可以通过调整参数来平衡查询速度和准确性。</div><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">讲解一下 HNSW 索引类型的原因？</div>
+<div class="separator"></div>
+<div class="field_1"><div>HNSW，它的设计更巧妙一些，就像是建立了一个多层的网络。我们先在最顶层大致定位，然后逐层往下找，越往下找得越精确。这种方式搜索特别快，但是会占用更多内存。</div><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">讲解一下 HNSW和&nbsp;IVF_FLAT，分别是啥时候使用。</div>
+<div class="separator"></div>
+<div class="field_1">在实际应用中，如果内存资源充足，而且特别注重查询速度，我会选择 HNSW。如果需要在性能和资源之间取得平衡，那么 IVF_FLAT 是个不错的选择。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">介绍RAG系统的上线经历【前期调研】</div>
+<div class="separator"></div>
+<div class="field_1">在技术选型时，我们对比了几个主流的向量数据库，最后选择了Milvus，主要是看中它在我们这种数据规模下性能表现不错，而且社区活跃，文档齐全。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">介绍RAG系统的上线经历【数据处理】</div>
+<div class="separator"></div>
+<div class="field_1">数据处理这块是我们投入精力最多的部分。因为垃圾进垃圾出嘛，数据质量直接影响最终效果。我们先对现有文档做了清洗，去掉了一些无效信息。然后在文档分段这块，我们采用了滑动窗口的方式，具体就是设置了512个token的窗口大小，同时保持128个token的重叠，这样可以避免切分时丢失上下文信息。我们用的是all-miniLM-L6-v2模型来生成文档向量，这个模型在效果和性能上都比较均衡。</div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">介绍RAG系统的上线经历【检索优化】</div>
+<div class="separator"></div>
+<div class="field_1"><div>检索这块我们做了不少优化工作。单纯用向量检索是不够的，所以我们实现了多路召回，除了向量相似度检索，还加入了关键词匹配，以及Query改写来扩展召回。经过测试，我们发现召回top-5的结果就能满足大部分场景需求，再多反而会带来噪音。</div><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">介绍RAG系统的上线经历【系统部署】</div>
+<div class="separator"></div>
+<div class="field_1"><div>在系统部署方面，我们采用了微服务架构，主要分为文档处理、向量计算、检索和LLM对话这几个服务。用K8s来做容器编排，这样方便扩缩容和管理。为了保证系统稳定性，我们还实现了服务的负载均衡和熔断机制。</div><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">介绍RAG系统的上线经历【监控这块】</div>
+<div class="separator"></div>
+<div class="field_1"><div>监控这块也是很重要的。我们建立了比较完整的监控体系，主要关注三个方面：服务响应时间、检索准确率和资源使用情况。有一次就是通过监控及时发现了向量检索服务的响应时间异常，最后排查出是因为向量数据库的cache设置不合理导致的。</div><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">介绍RAG系统的上线经历【上线后的评估】</div>
+<div class="separator"></div>
+<div class="field_1"><div>系统上线后，我们建立了一套评估指标体系，包括检索准确率、回答相关性和系统响应时间等。通过A/B测试和用户反馈，我们在持续优化系统。比如最近就优化了文档更新机制，确保知识库能够及时更新，保持信息的时效性。</div><br></div>
+</div>
+<div class="card">
+<div class="tags" aria-hidden="true">Tags: 导入Edge::2-22</div>
+<div class="field_0">介绍RAG系统的上线过程中遇到了不少挑战，哪两个？</div>
+<div class="separator"></div>
+<div class="field_1">比如向量检索的性能优化、大规模文档的实时更新等问题。</div>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+const container = e.target.closest('.video-container');
+if (!container) return;
+
+const placeholder = container.querySelector('.video-placeholder');
+if (!placeholder) return;
+
+const videoId = container.dataset.videoId;
+const startParam = container.dataset.start || '';
+
+const iframe = document.createElement('iframe');
+iframe.width = '100%';
+iframe.height = '100%';
+iframe.src = `https://www.youtube.com/embed/${videoId}?${startParam.slice(1)}`;
+iframe.title = 'YouTube video player';
+iframe.frameBorder = '0';
+iframe.style.position = 'absolute';
+iframe.style.top = '0';
+iframe.style.left = '0';
+iframe.style.borderRadius = '15px';
+iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+iframe.allowFullscreen = true;
+
+placeholder.innerHTML = '';
+placeholder.appendChild(iframe);
+});
+</script>
+
+</div>
+<div class="footer">Made by <a href="https://xxhk.org">Export Notes - XXHK</a></div>
+</body>
+</html>
+
