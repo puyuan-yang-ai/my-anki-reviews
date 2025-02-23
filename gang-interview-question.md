@@ -1,3 +1,16 @@
+百度面试题
+
+1.Transformer的原理                                     
+2.使用LangChain有没有遇到一些问题。                                                    
+3.除了LoRA还知道哪些微调方法   
+4.ptuning的原理                               
+5.现在的大模型使用什么LayerNorm
+6.讲讲RMSNorm的计算公式，LayerNorm的计算公式                     
+7.transformer的位置编码是什么，现在的大模型是什么编码，讲一下旋转位置编码                                       
+8.精检索的embedding考虑过哪些，都详细讲讲。                              
+9.做过全量微调吗                              
+10.一道算法题
+
 项目问题：
 
 - Qwen2.5-7B模型架构简单解释下？
