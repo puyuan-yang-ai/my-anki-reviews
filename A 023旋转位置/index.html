@@ -1,0 +1,313 @@
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Export Notes by xxhk.org</title>
+<style>
+
+body { font-family: Arial, sans-serif; }
+.card { border: 2px solid #000; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+img {
+max-width: 100%;
+height: auto;
+border: 1px solid lightgray;
+border-radius: 10px;
+display: inline-block;
+margin: 10px 0px;
+}
+.separator { border-top: 1px dashed #000; margin: 10px 0; }
+.tags { background-color: lightgray; padding: 5px 10px; margin-bottom: 10px; border-radius: 5px; display: inline-block; }
+.footer {
+text-align: center;
+color: grey;
+margin-top: 20px;
+padding: 10px;
+}
+
+.video-container {
+margin: 10px 0;
+}
+.video-placeholder {
+position: relative;
+cursor: pointer;
+}
+.play-button {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 68px;
+height: 48px;
+background-color: rgba(0, 0, 0, 0.7);
+border-radius: 14px;
+cursor: pointer;
+}
+.play-button::before {
+content: '';
+position: absolute;
+top: 50%;
+left: 55%;
+transform: translate(-50%, -50%);
+border-style: solid;
+border-width: 12px 0 12px 20px;
+border-color: transparent transparent transparent white;
+}
+.play-button:hover {
+background-color: red;
+}
+
+</style>
+
+</head>
+<body>
+<div id="cards-container">
+<div class="card">
+<div class="field_0">RoPE 里面的θk,p​&nbsp;，k和p，这两个字母分别表示什么意思？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">表示在第 k 个子维度、位置 p 上的“总旋转角度”。</div>
+</div>
+<div class="card">
+<div class="field_0">在 RoPE（Rotary Position Embedding）中，每个子向量的旋转角度由“位置”和“维度索引”一起决定，<br>位置索引和维度索引分别决定了什么？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">位置（Position） 决定了“这次要旋转<span style="color: rgb(255, 0, 127);"><b>多少步，时间步</b></span>”；序列中越后面的 token，偏转的角度越大。<br>维度（Dimension）决定了“旋转角度随位置变化的<span style="color: rgb(255, 0, 127);"><b>频率/角速度</b></span>”。常常是<span style="color: rgb(255, 0, 127);"><b>不同的 2D</b></span> <span style="color: rgb(255, 0, 127);"><b>小块</b></span>对应不同的“<b><span style="color: rgb(255, 0, 127);">基频</span></b>”。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE（Rotary Position Embedding）所采用的公式思路 是什么？【旋转角度是如何计算得到的？】</div>
+<div class="separator"></div>
+<div class="field_1">对第 k 组维度（2D 小块）有一个基频 αk ，再乘以序列位置 p 得到旋转角度 αk⋅p。&nbsp;</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 是否是简单地“加”或“拼接”位置向量。</div>
+<div class="separator"></div>
+<div class="field_1">不是，而是对向量进行旋转变换。</div>
+</div>
+<div class="card">
+<div class="field_0">在 RoPE（Rotary Position Embedding）中，本质是&nbsp;“多频率 + 随位置增量”叠加，这句话怎么理解呢？&nbsp;&nbsp; 【谁有不同的频率？增量表示什么意思？】</div>
+<div class="separator"></div>
+<div class="field_1">“每<span style="color: rgb(255, 0, 127);"><b>一组 ID</b></span> 维度（<span style="color: rgb(255, 0, 127);"><b>2D</b></span>子向量）有不同<span style="color: rgb(255, 0, 127);"><b>频率</b></span> + <span style="color: rgb(255, 0, 127);"><b>不同位置</b></span>序号导致<b><span style="color: rgb(255, 0, 127);">旋转角度</span></b>增加”。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE旋转位置编码的它的两点优点是什么？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><li>可以让模型更<span style="color: rgb(255, 0, 127);"><b>平滑地把“位置”</b></span>这一信息<span style="color: rgb(255, 0, 127);"><b>融入到自注意力</b></span>（self-attention）里；计算内积或相似度时，<b><span style="color: rgb(255, 0, 127);">不需要另外加</span></b>很多显式的<b><span style="color: rgb(255, 0, 127);">位置向量</span></b>。</li><li>具备<strong>更好的<span style="color: rgb(255, 0, 127);">外推</span></strong>（Extrapolation）能力，在处理比训练中<b><span style="color: rgb(255, 0, 127);">更长的序列</span></b>时效果也不错。</li></div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 在哪里进行怎么样变换来注入位置信息，相比于传统的绝对位置编码更擅长怎么样？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">通过在<span style="color: rgb(255, 0, 127);"><b>向量内部做旋转变换</b></span>来注入位置信息，比传统绝对位置编码更擅长<b><span style="color: rgb(255, 0, 127);">外推到长序列。</span></b></div>
+</div>
+<div class="card">
+<div class="field_0">在 RoPE（Rotary Position Embedding）中，当 token 处于位置 p 时，这个位置会乘上相应的什么，得到什么？</div>
+<div class="separator"></div>
+<div class="field_1">“基频，角速度” αk，得到旋转角度 ，<img src="images/paste-09c364764317e457928b0639f1ff927b64bc902b.jpg"></div>
+</div>
+<div class="card">
+<div class="field_0">在数学上。 旋转矩阵和欧拉公式为什么是等价的？&nbsp;<br><img src="images/paste-ea96d298636847371ef9ad52a3c0ca29848b8dbc.jpg"></div>
+<div class="separator"></div>
+<div class="field_1"><div>因为在二维平面上，乘以&nbsp;eiθ 就是一个逆时针旋转。</div></div>
+</div>
+<div class="card">
+<div class="field_0">传统的绝对位置编码是给序列位置加上一些 什么值，而 RoPE 则更进一步，让 哪两个 向量本身发生旋转，从而体现不同的位置信息。这样在做注意力计算时，会自然而然地保留“什么位置”特性，同时对什么样的序列也有一定泛化能力。</div>
+<div class="separator"></div>
+<div class="field_1">传统的绝对位置编码是给序列位置加上一些 <span style="color: rgb(255, 0, 127);"><b>sin / cos⁡</b></span> 值，而 RoPE 则更进一步，让 <span style="color: rgb(255, 0, 127);"><b>Query 和 Key</b></span> 向量本身发生旋转，从而体现不同的位置信息。这样在做注意力计算时，会自然而然地保留“<b><span style="color: rgb(255, 0, 127);">相对位置</span></b>”特性，同时对<span style="color: rgb(255, 0, 127);"><b>超过训练长度的序列</b></span>也有一定泛化能力。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 的旋转角度计算公式是下面，如何理解？<br><img src="images/paste-869e8d3eaaa26ab32258fec02783529ff9f3f2b3.jpg"></div>
+<div class="separator"></div>
+<div class="field_1">每个2D小块，它的旋转角度是由当前token的<span style="color: rgb(255, 0, 127);"><b>位置索引p</b></span>以及当前<b><span style="color: rgb(255, 0, 127);">维度索引k所对应的频率α</span></b>所决定的。&nbsp;&nbsp;</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE（Rotary Position Embedding）里面第 k 对 2D 维度定义一个基频 α_k 。<br>当位置是 p 时，旋转角度就是什么？</div>
+<div class="separator"></div>
+<div class="field_1">α_k&nbsp;⋅ p。&nbsp;</div>
+</div>
+<div class="card">
+<div class="field_0">在 RoPE（Rotary Position Embedding）中，为什么操作的是2D 子向量，也就是以二维为单位？</div>
+<div class="separator"></div>
+<div class="field_1">RoPE 的“旋转”本质是一个<b><span style="color: rgb(255, 0, 127);">二维平面</span></b>上的操作（或者说<span style="color: rgb(255, 0, 127);"><b>复数</b></span>乘法），所以我们必须以 2 维为单位。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 里面，如果只考虑“位置索引”和“维度拆分”，那么同一个位置号、同一对 2D 维度所得到的什么是相同的？</div>
+<div class="separator"></div>
+<div class="field_1">旋转角度。</div>
+</div>
+<div class="card">
+<div class="field_0">欧拉公式 是一个等式，公式是下面这样，<br><img src="images/paste-ea96d298636847371ef9ad52a3c0ca29848b8dbc.jpg"><br>θ 和 eiθ&nbsp;分别表示什么意思？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><li>θ 表示一个角度。</li><li>eiθ 被看作是在复平面上以原点为中心的一个<strong>逆时针旋转</strong>操作。</li></div>
+</div>
+<div class="card">
+<div class="field_0">简单说下旋转位置编码，从向量拆分开始？【涉及到欧拉公式和旋转矩阵】</div>
+<div class="separator"></div>
+<div class="field_1">在 RoPE 里，我们先把向量分成多个&nbsp;组，<span style="color: rgb(255, 0, 127);"><b>每组是 2 维</b></span>，然后对每一组应用一个与“<b><span style="color: rgb(255, 0, 127);">位置索引</span></b>”相关的<span style="color: rgb(255, 0, 127);"><strong>特定的旋转矩阵</strong></span>。<br>而在数学上，这个欧拉公式跟旋转矩阵是等价的。&nbsp;&nbsp;</div>
+</div>
+<div class="card">
+<div class="field_0">二维旋转矩阵常写作什么样？</div>
+<div class="separator"></div>
+<div class="field_1"><img src="images/paste-93e7377db529f5f071d04d2cf33afa2b108e86ec.jpg"></div>
+</div>
+<div class="card">
+<div class="field_0">为什么说，RoPE 和传统的绝对位置编码是一致的。</div>
+<div class="separator"></div>
+<div class="field_1">只要位置相同且维度相同，RoPE 就会给出相同的旋转。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 里面，在第一个序列的第一个 token和第二个序列的第一个 token，如果它们都是位置 p=0，并且你看的是同一对维度 (x2k−1,x2k) ，那么它们在 RoPE 中会怎么样？</div>
+<div class="separator"></div>
+<div class="field_1">会应用同样的旋转。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 里面，如果只考虑“位置索引”和“维度拆分”，那么同一个位置号、同一对 2D 维度所得到的“旋转角度”是否是相同的？</div>
+<div class="separator"></div>
+<div class="field_1">是的。</div>
+</div>
+<div class="card">
+<div class="field_0">在 RoPE（Rotary Position Embedding）中，P表示什么意思，P越大什么越大。&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">P表示token在序列里面的位置。&nbsp;&nbsp;<br>位置 p 越大，旋转角度就越大，从而体现出对相对位置信息的编码。</div>
+</div>
+<div class="card">
+<div class="field_0">在 RoPE（Rotary Position Embedding）中，对每一个 2D 子向量，为什么要 2D？</div>
+<div class="separator"></div>
+<div class="field_1">因为一个维度是标量，无法单独“旋转”；要在平面（2D）里，才能做出类似&nbsp;cos⁡θ /&nbsp;sin⁡θ 的旋转变换。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 的旋转角度 是由位置索引 &amp; 维度索引 这两个索引决定的。维度索引 k 索引会映射成一个什么？</div>
+<div class="separator"></div>
+<div class="field_1">索引会映射成一个“基频”或“角速度” αk 。不同子向量有不同的频率，以覆盖不同的长度尺度。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 的最小单位是什么？</div>
+<div class="separator"></div>
+<div class="field_1">二维子向量为一组。「2D 组」（成对做旋转）。</div>
+</div>
+<div class="card">
+<div class="field_0">对于旋转位置编码来说。&nbsp;同一个 token 内部，如果我们将向量拆分为多对 (x2k−1,x2k) ，那么每对 2D 维度也会有 各自的 什么不同，从而导致它们的旋转角度不一样。</div>
+<div class="separator"></div>
+<div class="field_1">“基频”或“角速度”。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 通常是对向量的什么作为一组来做旋转？</div>
+<div class="separator"></div>
+<div class="field_1">每两个维度。2d子向量。</div>
+</div>
+<div class="card">
+<div class="field_0">对于旋转位置编码来说。 哪两个因素一起决定了那一对维度的旋转角度 θk,p&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">位置序号以及维度序号。<br>位置 p 和 2D 子向量编号 k 。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 的旋转角度 是由位置索引 &amp; 维度索引 这两个索引决定的。位置索引 p 代表什么意思？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">代表当前 token 在序列中的位置，随着序列往后（p 增加），旋转角度也随之变大。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 的旋转角度由 什么 索引 × (什么索引对应的什么)’ 决定”，再把这个角度应用到向量的相应哪里？</div>
+<div class="separator"></div>
+<div class="field_1">位置索引，维度索引对应的频率，&nbsp;2D 子空间。</div>
+</div>
+<div class="card">
+<div class="field_0">将旋转位置编码简单地想成什么？【哪一个向量？旋转一定角度，这个角度是什么乘上什么得到的?】</div>
+<div class="separator"></div>
+<div class="field_1">“每一个 2D 子向量，都被<span style="color: rgb(255, 0, 127);"><b>位置索引</b></span>乘上一个<b><span style="color: rgb(255, 0, 127);">维度索引对应的频率系数</span></b>旋转一定角度，这样就在向量里隐含地编码了它‘在序列中位于第几步’的信息。”</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 的旋转角度 是由位置索引 &amp; 维度索引 这两个索引决定的。维度索引 k 代表什么意思？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">表示在高维向量中，第 k 个 2D 子向量（或说是第 k 对维度）。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 里面，如果只考虑“位置索引”和“维度拆分”，那么同一个什么、同一对什么？所得到的<b><span style="color: rgb(255, 0, 127);">旋转角度</span></b>是相同的？</div>
+<div class="separator"></div>
+<div class="field_1">同一个位置号，同一对2D 维度。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 属于相对位置编码吗？</div>
+<div class="separator"></div>
+<div class="field_1">它的实现形式更像*<span style="color: rgb(255, 0, 127);"><b>绝对</b></span>”编码（因为给<span style="color: rgb(255, 0, 127);"><b>每个位置一个旋转角</b></span>），但通过在注意力中<b><span style="color: rgb(255, 0, 127);">点积的角度差</span></b>，模型可以学到<span style="color: rgb(255, 0, 127);"><b>相对位置关系 </b></span>。所以可以看成“兼具相对位置感的绝对位置编码”。</div>
+</div>
+<div class="card">
+<div class="field_0">旋转位置编码的两种好处是什么？&nbsp;&nbsp;【在计算什么的时候保留相对位置信息。以及在处理什么的时候，比绝对位置编码更稳定。】</div>
+<div class="separator"></div>
+<div class="field_1">旋转位置编码能够让模型更好地在自注意力中保留相对位置信息，而且在处理长序列时比传统绝对位置编码更稳定。</div>
+</div>
+<div class="card">
+<div class="field_0">二维旋转矩阵常写作<br><img src="images/paste-93e7377db529f5f071d04d2cf33afa2b108e86ec.jpg"><br>表示什么意思？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">&nbsp;<img src="images/paste-1fcf15f97b534fd1b00d38ead199a4d7cdb449c6.jpg"></div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 的旋转角度是θ ，那么2D 子向量(x2k−1,x2k)，是如何做旋转操作的？对应的公式是什么？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><img src="images/paste-7fd9cd9269e4bac928f7aa1d3b83b637040a16f8.jpg"></div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 就是在每个 什么上做一个“随什么增长的旋转角度”变换，从而在向量内部带入了什么信息。</div>
+<div class="separator"></div>
+<div class="field_1">RoPE 就是在每个 <span style="color: rgb(255, 0, 127);"><b>2D 子向量</b></span>上做一个<span style="color: rgb(255, 0, 127);"><b>“随位置增长的旋转角度</b></span>”变换，从而在向量内部带入了<b><span style="color: rgb(255, 0, 127);">位置</span></b>信息。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 的旋转角度 是由哪两个索引决定的？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">位置索引p &amp; 维度索引k。</div>
+</div>
+<div class="card">
+<div class="field_0">二维旋转矩阵常写作<br><img src="images/paste-93e7377db529f5f071d04d2cf33afa2b108e86ec.jpg"><br>这个矩阵为什么与欧拉公式是一体两面？</div>
+<div class="separator"></div>
+<div class="field_1"><img src="images/paste-b1187581c080bfed7c3d88adc4ed45e230321359.jpg"><br>二者都反映了同样的几何变换：将平面中的点围绕原点旋转 θ。</div>
+</div>
+<div class="card">
+<div class="field_0">把一个二维向量 (x,y) 当作复数 z=x+iy，那么把 z 乘以 eiθ，得到的新复数就是什么？</div>
+<div class="separator"></div>
+<div class="field_1">原向量逆时针旋转 θ 后的结果。</div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 对应的英文全称和中文名称。&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">Rotary Positional Encoding，旋转位置编码。&nbsp;</div>
+</div>
+<div class="card">
+<div class="field_0">对于旋转位置编码来说。第 k 组维度在位置 p 时的旋转角度，计算公式是什么？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><img src="images/paste-2e31ebe73e23835b04e2c0c80fe002a8b10d4519.jpg"></div>
+</div>
+<div class="card">
+<div class="field_0">RoPE 兼具部分相对位置编码的优点，但它在实现层面，还是为每个绝对位置分配一个什么？</div>
+<div class="separator"></div>
+<div class="field_1">旋转角。</div>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+const container = e.target.closest('.video-container');
+if (!container) return;
+
+const placeholder = container.querySelector('.video-placeholder');
+if (!placeholder) return;
+
+const videoId = container.dataset.videoId;
+const startParam = container.dataset.start || '';
+
+const iframe = document.createElement('iframe');
+iframe.width = '100%';
+iframe.height = '100%';
+iframe.src = `https://www.youtube.com/embed/${videoId}?${startParam.slice(1)}`;
+iframe.title = 'YouTube video player';
+iframe.frameBorder = '0';
+iframe.style.position = 'absolute';
+iframe.style.top = '0';
+iframe.style.left = '0';
+iframe.style.borderRadius = '15px';
+iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+iframe.allowFullscreen = true;
+
+placeholder.innerHTML = '';
+placeholder.appendChild(iframe);
+});
+</script>
+
+</div>
+<div class="footer">Made by <a href="https://xxhk.org">Export Notes - XXHK</a></div>
+</body>
+</html>
+
