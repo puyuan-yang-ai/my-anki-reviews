@@ -1,0 +1,684 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"/><title>埃及七日游的打卡版本</title><style>
+/* cspell:disable-file */
+/* webkit printing magic: print all background colors */
+html {
+	-webkit-print-color-adjust: exact;
+}
+* {
+	box-sizing: border-box;
+	-webkit-print-color-adjust: exact;
+}
+
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+@media only screen {
+	body {
+		margin: 2em auto;
+		max-width: 900px;
+		color: rgb(55, 53, 47);
+	}
+}
+
+body {
+	line-height: 1.5;
+	white-space: pre-wrap;
+}
+
+a,
+a.visited {
+	color: inherit;
+	text-decoration: underline;
+}
+
+.pdf-relative-link-path {
+	font-size: 80%;
+	color: #444;
+}
+
+h1,
+h2,
+h3 {
+	letter-spacing: -0.01em;
+	line-height: 1.2;
+	font-weight: 600;
+	margin-bottom: 0;
+}
+
+.page-title {
+	font-size: 2.5rem;
+	font-weight: 700;
+	margin-top: 0;
+	margin-bottom: 0.75em;
+}
+
+h1 {
+	font-size: 1.875rem;
+	margin-top: 1.875rem;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin-top: 1.5rem;
+}
+
+h3 {
+	font-size: 1.25rem;
+	margin-top: 1.25rem;
+}
+
+.source {
+	border: 1px solid #ddd;
+	border-radius: 3px;
+	padding: 1.5em;
+	word-break: break-all;
+}
+
+.callout {
+	border-radius: 3px;
+	padding: 1rem;
+}
+
+figure {
+	margin: 1.25em 0;
+	page-break-inside: avoid;
+}
+
+figcaption {
+	opacity: 0.5;
+	font-size: 85%;
+	margin-top: 0.5em;
+}
+
+mark {
+	background-color: transparent;
+}
+
+.indented {
+	padding-left: 1.5em;
+}
+
+hr {
+	background: transparent;
+	display: block;
+	width: 100%;
+	height: 1px;
+	visibility: visible;
+	border: none;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.09);
+}
+
+img {
+	max-width: 100%;
+}
+
+@media only print {
+	img {
+		max-height: 100vh;
+		object-fit: contain;
+	}
+}
+
+@page {
+	margin: 1in;
+}
+
+.collection-content {
+	font-size: 0.875rem;
+}
+
+.column-list {
+	display: flex;
+	justify-content: space-between;
+}
+
+.column {
+	padding: 0 1em;
+}
+
+.column:first-child {
+	padding-left: 0;
+}
+
+.column:last-child {
+	padding-right: 0;
+}
+
+.table_of_contents-item {
+	display: block;
+	font-size: 0.875rem;
+	line-height: 1.3;
+	padding: 0.125rem;
+}
+
+.table_of_contents-indent-1 {
+	margin-left: 1.5rem;
+}
+
+.table_of_contents-indent-2 {
+	margin-left: 3rem;
+}
+
+.table_of_contents-indent-3 {
+	margin-left: 4.5rem;
+}
+
+.table_of_contents-link {
+	text-decoration: none;
+	opacity: 0.7;
+	border-bottom: 1px solid rgba(55, 53, 47, 0.18);
+}
+
+table,
+th,
+td {
+	border: 1px solid rgba(55, 53, 47, 0.09);
+	border-collapse: collapse;
+}
+
+table {
+	border-left: none;
+	border-right: none;
+}
+
+th,
+td {
+	font-weight: normal;
+	padding: 0.25em 0.5em;
+	line-height: 1.5;
+	min-height: 1.5em;
+	text-align: left;
+}
+
+th {
+	color: rgba(55, 53, 47, 0.6);
+}
+
+ol,
+ul {
+	margin: 0;
+	margin-block-start: 0.6em;
+	margin-block-end: 0.6em;
+}
+
+li > ol:first-child,
+li > ul:first-child {
+	margin-block-start: 0.6em;
+}
+
+ul > li {
+	list-style: disc;
+}
+
+ul.to-do-list {
+	padding-inline-start: 0;
+}
+
+ul.to-do-list > li {
+	list-style: none;
+}
+
+.to-do-children-checked {
+	text-decoration: line-through;
+	opacity: 0.375;
+}
+
+ul.toggle > li {
+	list-style: none;
+}
+
+ul {
+	padding-inline-start: 1.7em;
+}
+
+ul > li {
+	padding-left: 0.1em;
+}
+
+ol {
+	padding-inline-start: 1.6em;
+}
+
+ol > li {
+	padding-left: 0.2em;
+}
+
+.mono ol {
+	padding-inline-start: 2em;
+}
+
+.mono ol > li {
+	text-indent: -0.4em;
+}
+
+.toggle {
+	padding-inline-start: 0em;
+	list-style-type: none;
+}
+
+/* Indent toggle children */
+.toggle > li > details {
+	padding-left: 1.7em;
+}
+
+.toggle > li > details > summary {
+	margin-left: -1.1em;
+}
+
+.selected-value {
+	display: inline-block;
+	padding: 0 0.5em;
+	background: rgba(206, 205, 202, 0.5);
+	border-radius: 3px;
+	margin-right: 0.5em;
+	margin-top: 0.3em;
+	margin-bottom: 0.3em;
+	white-space: nowrap;
+}
+
+.collection-title {
+	display: inline-block;
+	margin-right: 1em;
+}
+
+.page-description {
+	margin-bottom: 2em;
+}
+
+.simple-table {
+	margin-top: 1em;
+	font-size: 0.875rem;
+	empty-cells: show;
+}
+.simple-table td {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table th {
+	height: 29px;
+	min-width: 120px;
+}
+
+.simple-table-header-color {
+	background: rgb(247, 246, 243);
+	color: black;
+}
+.simple-table-header {
+	font-weight: 500;
+}
+
+time {
+	opacity: 0.5;
+}
+
+.icon {
+	display: inline-block;
+	max-width: 1.2em;
+	max-height: 1.2em;
+	text-decoration: none;
+	vertical-align: text-bottom;
+	margin-right: 0.5em;
+}
+
+img.icon {
+	border-radius: 3px;
+}
+
+.user-icon {
+	width: 1.5em;
+	height: 1.5em;
+	border-radius: 100%;
+	margin-right: 0.5rem;
+}
+
+.user-icon-inner {
+	font-size: 0.8em;
+}
+
+.text-icon {
+	border: 1px solid #000;
+	text-align: center;
+}
+
+.page-cover-image {
+	display: block;
+	object-fit: cover;
+	width: 100%;
+	max-height: 30vh;
+}
+
+.page-header-icon {
+	font-size: 3rem;
+	margin-bottom: 1rem;
+}
+
+.page-header-icon-with-cover {
+	margin-top: -0.72em;
+	margin-left: 0.07em;
+}
+
+.page-header-icon img {
+	border-radius: 3px;
+}
+
+.link-to-page {
+	margin: 1em 0;
+	padding: 0;
+	border: none;
+	font-weight: 500;
+}
+
+p > .user {
+	opacity: 0.5;
+}
+
+td > .user,
+td > time {
+	white-space: nowrap;
+}
+
+input[type="checkbox"] {
+	transform: scale(1.5);
+	margin-right: 0.6em;
+	vertical-align: middle;
+}
+
+p {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+}
+
+.image {
+	border: none;
+	margin: 1.5em 0;
+	padding: 0;
+	border-radius: 0;
+	text-align: center;
+}
+
+.code,
+code {
+	background: rgba(135, 131, 120, 0.15);
+	border-radius: 3px;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-size: 85%;
+	tab-size: 2;
+}
+
+code {
+	color: #eb5757;
+}
+
+.code {
+	padding: 1.5em 1em;
+}
+
+.code-wrap {
+	white-space: pre-wrap;
+	word-break: break-all;
+}
+
+.code > code {
+	background: none;
+	padding: 0;
+	font-size: 100%;
+	color: inherit;
+}
+
+blockquote {
+	font-size: 1.25em;
+	margin: 1em 0;
+	padding-left: 1em;
+	border-left: 3px solid rgb(55, 53, 47);
+}
+
+.bookmark {
+	text-decoration: none;
+	max-height: 8em;
+	padding: 0;
+	display: flex;
+	width: 100%;
+	align-items: stretch;
+}
+
+.bookmark-title {
+	font-size: 0.85em;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	height: 1.75em;
+	white-space: nowrap;
+}
+
+.bookmark-text {
+	display: flex;
+	flex-direction: column;
+}
+
+.bookmark-info {
+	flex: 4 1 180px;
+	padding: 12px 14px 14px;
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
+}
+
+.bookmark-image {
+	width: 33%;
+	flex: 1 1 180px;
+	display: block;
+	position: relative;
+	object-fit: cover;
+	border-radius: 1px;
+}
+
+.bookmark-description {
+	color: rgba(55, 53, 47, 0.6);
+	font-size: 0.75em;
+	overflow: hidden;
+	max-height: 4.5em;
+	word-break: break-word;
+}
+
+.bookmark-href {
+	font-size: 0.75em;
+	margin-top: 0.25em;
+}
+
+.sans { font-family: ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol"; }
+.code { font-family: "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace; }
+.serif { font-family: Lyon-Text, Georgia, ui-serif, serif; }
+.mono { font-family: iawriter-mono, Nitti, Menlo, Courier, monospace; }
+.pdf .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK JP'; }
+.pdf:lang(zh-CN) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK SC'; }
+.pdf:lang(zh-TW) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK TC'; }
+.pdf:lang(ko-KR) .sans { font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI Variable Display", "Segoe UI", Helvetica, "Apple Color Emoji", Arial, sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", 'Twemoji', 'Noto Color Emoji', 'Noto Sans CJK KR'; }
+.pdf .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .code { font-family: Source Code Pro, "SFMono-Regular", Menlo, Consolas, "PT Mono", "Liberation Mono", Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.pdf .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK JP'; }
+.pdf:lang(zh-CN) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK SC'; }
+.pdf:lang(zh-TW) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK TC'; }
+.pdf:lang(ko-KR) .serif { font-family: PT Serif, Lyon-Text, Georgia, ui-serif, serif, 'Twemoji', 'Noto Color Emoji', 'Noto Serif CJK KR'; }
+.pdf .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK JP'; }
+.pdf:lang(zh-CN) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK SC'; }
+.pdf:lang(zh-TW) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK TC'; }
+.pdf:lang(ko-KR) .mono { font-family: PT Mono, iawriter-mono, Nitti, Menlo, Courier, monospace, 'Twemoji', 'Noto Color Emoji', 'Noto Sans Mono CJK KR'; }
+.highlight-default {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.highlight-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.highlight-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.highlight-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.highlight-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.highlight-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.highlight-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.highlight-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.highlight-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.highlight-default_background {
+	color: rgba(55, 53, 47, 1);
+}
+.highlight-gray_background {
+	background: rgba(248, 248, 247, 1);
+}
+.highlight-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.highlight-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.highlight-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.highlight-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.highlight-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.highlight-purple_background {
+	background: rgba(248, 243, 252, 1);
+}
+.highlight-pink_background {
+	background: rgba(252, 241, 246, 1);
+}
+.highlight-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.block-color-default {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray {
+	color: rgba(120, 119, 116, 1);
+	fill: rgba(120, 119, 116, 1);
+}
+.block-color-brown {
+	color: rgba(159, 107, 83, 1);
+	fill: rgba(159, 107, 83, 1);
+}
+.block-color-orange {
+	color: rgba(217, 115, 13, 1);
+	fill: rgba(217, 115, 13, 1);
+}
+.block-color-yellow {
+	color: rgba(203, 145, 47, 1);
+	fill: rgba(203, 145, 47, 1);
+}
+.block-color-teal {
+	color: rgba(68, 131, 97, 1);
+	fill: rgba(68, 131, 97, 1);
+}
+.block-color-blue {
+	color: rgba(51, 126, 169, 1);
+	fill: rgba(51, 126, 169, 1);
+}
+.block-color-purple {
+	color: rgba(144, 101, 176, 1);
+	fill: rgba(144, 101, 176, 1);
+}
+.block-color-pink {
+	color: rgba(193, 76, 138, 1);
+	fill: rgba(193, 76, 138, 1);
+}
+.block-color-red {
+	color: rgba(212, 76, 71, 1);
+	fill: rgba(212, 76, 71, 1);
+}
+.block-color-default_background {
+	color: inherit;
+	fill: inherit;
+}
+.block-color-gray_background {
+	background: rgba(248, 248, 247, 1);
+}
+.block-color-brown_background {
+	background: rgba(244, 238, 238, 1);
+}
+.block-color-orange_background {
+	background: rgba(251, 236, 221, 1);
+}
+.block-color-yellow_background {
+	background: rgba(251, 243, 219, 1);
+}
+.block-color-teal_background {
+	background: rgba(237, 243, 236, 1);
+}
+.block-color-blue_background {
+	background: rgba(231, 243, 248, 1);
+}
+.block-color-purple_background {
+	background: rgba(248, 243, 252, 1);
+}
+.block-color-pink_background {
+	background: rgba(252, 241, 246, 1);
+}
+.block-color-red_background {
+	background: rgba(253, 235, 236, 1);
+}
+.select-value-color-uiBlue { background-color: undefined; }
+.select-value-color-pink { background-color: rgba(225, 136, 179, 0.27); }
+.select-value-color-purple { background-color: rgba(168, 129, 197, 0.27); }
+.select-value-color-green { background-color: rgba(123, 183, 129, 0.27); }
+.select-value-color-gray { background-color: rgba(84, 72, 49, 0.15); }
+.select-value-color-transparentGray { background-color: undefined; }
+.select-value-color-translucentGray { background-color: undefined; }
+.select-value-color-orange { background-color: rgba(224, 124, 57, 0.27); }
+.select-value-color-brown { background-color: rgba(210, 162, 141, 0.35); }
+.select-value-color-red { background-color: rgba(244, 171, 159, 0.4); }
+.select-value-color-yellow { background-color: rgba(236, 191, 66, 0.39); }
+.select-value-color-blue { background-color: rgba(93, 165, 206, 0.27); }
+.select-value-color-pageGlass { background-color: undefined; }
+.select-value-color-washGlass { background-color: undefined; }
+
+.checkbox {
+	display: inline-flex;
+	vertical-align: text-bottom;
+	width: 16;
+	height: 16;
+	background-size: 16px;
+	margin-left: 2px;
+	margin-right: 5px;
+}
+
+.checkbox-on {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20width%3D%2216%22%20height%3D%2216%22%20fill%3D%22%2358A9D7%22%2F%3E%0A%3Cpath%20d%3D%22M6.71429%2012.2852L14%204.9995L12.7143%203.71436L6.71429%209.71378L3.28571%206.2831L2%207.57092L6.71429%2012.2852Z%22%20fill%3D%22white%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+
+.checkbox-off {
+	background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%2216%22%20height%3D%2216%22%20viewBox%3D%220%200%2016%2016%22%20fill%3D%22none%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%3E%0A%3Crect%20x%3D%220.75%22%20y%3D%220.75%22%20width%3D%2214.5%22%20height%3D%2214.5%22%20fill%3D%22white%22%20stroke%3D%22%2336352F%22%20stroke-width%3D%221.5%22%2F%3E%0A%3C%2Fsvg%3E");
+}
+	
+</style></head><body><article id="1bfe027f-7a92-8030-be6e-de4d135d957c" class="page sans"><header><h1 class="page-title">埃及七日游的打卡版本</h1><p class="page-description"></p></header><div class="page-body"><hr id="1bfe027f-7a92-8083-a482-f316e57597a3"/><h2 id="1bfe027f-7a92-809a-96e1-e982f4f1a6c4" class="">✅ <strong>Day 1 | 3月29日（赫尔格达）｜红海轻松开启</strong></h2><h3 id="1bfe027f-7a92-805f-80e5-f4f1d60fd816" class="">☀️ 上午：</h3><ul id="1bfe027f-7a92-803e-8f78-d31a2e4d83ff" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">抵达赫尔格达，前往酒店放行李</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80cd-af77-d9fdde771a78" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">前往【赫尔格达码头】或【Sheraton Road】散步熟悉环境</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80af-8207-c70a963eedb8" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">找海边咖啡馆吃早餐（推荐鸡蛋、面包、果汁）</span><div class="indented"></div></li></ul><h3 id="1bfe027f-7a92-8058-92ff-d90c38198996" class="">🌤 下午：</h3><ul id="1bfe027f-7a92-8031-995a-d9552b0ef598" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">报名参加【吉夫顿岛浮潜半日游】</span><div class="indented"><ul id="1bfe027f-7a92-80e6-a906-e0bd2a6cb450" class="bulleted-list"><li style="list-style-type:disc">含浮潜装备、午餐、酒店接送</li></ul></div></li></ul><ul id="1bfe027f-7a92-8060-9fd8-ce9393cfc3c3" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">或选择沙滩边休息 + 沙滩戏水晒太阳</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8067-a3a9-facf3b904b25" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">回酒店稍作休息</span><div class="indented"></div></li></ul><h3 id="1bfe027f-7a92-8077-b327-e612ff533d74" class="">🌙 晚上：</h3><ul id="1bfe027f-7a92-80c3-a9c1-d7181f6e3058" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">晚餐推荐尝试【Koshari（卡沙里）】或【烤鱼 / 烤虾】</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8031-bdd3-c7c334743478" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">沿赫尔格达码头夜游、冰淇淋散步</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80ee-b712-f8211aca55ee" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">早睡为第二天的沙漠探险养精蓄锐</span><div class="indented"></div></li></ul><hr id="1bfe027f-7a92-8093-8b29-e9e8fe7e2799"/><h2 id="1bfe027f-7a92-804e-903c-e34f19d157b9" class="">✅ <strong>Day 2 | 3月30日（赫尔格达）｜沙漠越野 &amp; 贝都因文化</strong></h2><h3 id="1bfe027f-7a92-80f4-a433-f10b5c92b037" class="">☀️ 上午：</h3><ul id="1bfe027f-7a92-802b-b965-fa1a42e524ad" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">享用地道埃及早餐：</span><div class="indented"><ul id="1bfe027f-7a92-803b-9ae3-d37a89713cc3" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Ta’ameya（豆饼）</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-809e-9763-cbaaf050baac" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">Ful Medames（蚕豆泥）</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8023-a8c0-c90bfee137f3" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">面包 + 薄荷茶</span><div class="indented"></div></li></ul></div></li></ul><ul id="1bfe027f-7a92-806d-b6da-d92e55bbc531" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">自由活动：市场闲逛、酒店泳池、发呆晒太阳</span><div class="indented"></div></li></ul><h3 id="1bfe027f-7a92-80bd-b22c-d9d6d49bbcde" class="">🌤 下午：</h3><ul id="1bfe027f-7a92-80d6-8c5a-fb4508422db0" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">参加【沙漠ATV越野 + 贝都因村 + 骆驼骑行】</span><div class="indented"><ul id="1bfe027f-7a92-8008-a7fb-caeee7fb7b7d" class="bulleted-list"><li style="list-style-type:disc">含酒店接送（通常14:00出发）</li></ul><ul id="1bfe027f-7a92-80d9-935b-c1a8ded9bdab" class="bulleted-list"><li style="list-style-type:disc">骑沙地摩托穿越沙丘</li></ul><ul id="1bfe027f-7a92-8079-9a1a-dc2902f18a24" class="bulleted-list"><li style="list-style-type:disc">到达贝都因村落、喝茶交流</li></ul><ul id="1bfe027f-7a92-80ca-ad21-ee080ffa1f6c" class="bulleted-list"><li style="list-style-type:disc">观看沙漠日落</li></ul></div></li></ul><h3 id="1bfe027f-7a92-80b0-b18a-cfb34ec2ad88" class="">🌙 晚上：</h3><ul id="1bfe027f-7a92-80a8-ae48-cd77a27ca453" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">沙漠中享用【贝都因BBQ晚餐】（烤鸡、烤肉、沙拉、面包）</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8042-b9ff-e82311345f19" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">观星 or 看表演</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80b8-8ae1-c3cec0457f9a" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">回酒店休息</span><div class="indented"></div></li></ul><hr id="1bfe027f-7a92-80c7-a094-f63e0902b65b"/><h2 id="1bfe027f-7a92-8015-b2ad-d5b6c5ed39ba" class="">✅ <strong>Day 3 | 3月31日（赫尔格达到卢克索）｜初识古都</strong></h2><h3 id="1bfe027f-7a92-80a8-9a66-eaa982f235cf" class="">☀️ 上午：</h3><ul id="1bfe027f-7a92-8056-975e-c3b43a5000f0" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">搭乘【Go Bus】或长途车前往卢克索（约4–5小时）</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80fd-a14f-c7b8dc297fd6" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">到达卢克索后前往酒店寄存行李或办理入住</span><div class="indented"></div></li></ul><h3 id="1bfe027f-7a92-8080-b259-f6d84e64f155" class="">🌤 下午：</h3><ul id="1bfe027f-7a92-8014-977b-d926a1506bd0" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">前往【卡尔纳克神庙】游览（推荐15:00前入场）</span><div class="indented"><ul id="1bfe027f-7a92-8004-ad91-e07ad00e466a" class="bulleted-list"><li style="list-style-type:disc">推荐乘出租车或马车前往</li></ul><ul id="1bfe027f-7a92-80ac-a7ae-db58e98a1dca" class="bulleted-list"><li style="list-style-type:disc">参观：列柱大厅、圣湖、方尖碑</li></ul></div></li></ul><h3 id="1bfe027f-7a92-8029-aad0-fe55f0394866" class="">🌙 晚上：</h3><ul id="1bfe027f-7a92-80aa-bcaa-f0924815ba76" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">夜游【卢克索神庙】（灯光映照下更震撼）</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8031-ab26-cb8239febac1" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">晚餐推荐：</span><div class="indented"><ul id="1bfe027f-7a92-80aa-835c-f007d2ece376" class="bulleted-list"><li style="list-style-type:disc">Mix Grill（烤肉拼盘）</li></ul><ul id="1bfe027f-7a92-80e6-a283-d8b49212b7f9" class="bulleted-list"><li style="list-style-type:disc">Mahshi（酿蔬菜）</li></ul></div></li></ul><ul id="1bfe027f-7a92-80bf-a7ae-ca826b09e0ad" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">回酒店休息</span><div class="indented"></div></li></ul><hr id="1bfe027f-7a92-80d6-9ab5-fcbe38f531d4"/><h2 id="1bfe027f-7a92-8042-bc0f-d252e5d89dda" class="">✅ <strong>Day 4 | 4月1日（卢克索西岸）｜帝王之谷 &amp; 女王神庙</strong></h2><h3 id="1bfe027f-7a92-80e0-b613-e9ac92b3dfbe" class="">☀️ 上午：</h3><ul id="1bfe027f-7a92-8093-96ce-e9273b48bd85" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">坐轮渡前往【西岸】</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80d1-8ea3-ede104c787df" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">包车或拼车前往：</span><div class="indented"><ul id="1bfe027f-7a92-8017-8c75-f44df40175a9" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">【帝王谷】参观3个陵墓（可选加购图坦卡蒙墓）</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8066-9435-c1d02d98942c" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">【哈特谢普苏特神庙】</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80fa-968d-d46d67c01fd5" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">【门农巨像】拍照打卡</span><div class="indented"></div></li></ul></div></li></ul><h3 id="1bfe027f-7a92-8075-ac33-e687b3734413" class="">🌤 下午：</h3><ul id="1bfe027f-7a92-808a-b63e-e6889ed23878" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">回酒店休整，收拾行李</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8099-9f13-e3541c2295d8" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">简单午餐（例如Koshari、Pita三明治）</span><div class="indented"></div></li></ul><h3 id="1bfe027f-7a92-80a3-b33b-e8effe1fead2" class="">🌙 晚上：</h3><ul id="1bfe027f-7a92-808e-9fb5-ff1d220c6115" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">搭乘【卧铺火车】或【夜班巴士】前往开罗</span><div class="indented"><ul id="1bfe027f-7a92-8022-85b5-fc7052aefcbb" class="bulleted-list"><li style="list-style-type:disc">卧铺火车含餐，需提前订票</li></ul><ul id="1bfe027f-7a92-804b-bd23-ef41fa4b34f0" class="bulleted-list"><li style="list-style-type:disc">夜巴可前往Go Bus站搭乘</li></ul></div></li></ul><ul id="1bfe027f-7a92-80e2-bc00-debd88721a29" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">车上休息</span><div class="indented"></div></li></ul><hr id="1bfe027f-7a92-803c-9265-d8107c0ab603"/><h2 id="1bfe027f-7a92-80db-9705-c24e87c536c1" class="">✅ <strong>Day 5 | 4月2日（开罗）｜金字塔与图坦卡蒙宝藏</strong></h2><h3 id="1bfe027f-7a92-80c5-898a-c53c8c9fd6a5" class="">☀️ 上午：</h3><ul id="1bfe027f-7a92-804a-b796-e23c63b9f590" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">抵达开罗 → 前往酒店寄存行李或入住</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-805f-b4c8-ea45b6fc9ea2" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">游览【吉萨金字塔群】：</span><div class="indented"><ul id="1bfe027f-7a92-8055-a5a4-d4382e5ec603" class="bulleted-list"><li style="list-style-type:disc">胡夫金字塔（可入内）</li></ul><ul id="1bfe027f-7a92-80e7-a230-c37f1b6e9025" class="bulleted-list"><li style="list-style-type:disc">哈夫拉 + 孟卡乌拉金字塔</li></ul><ul id="1bfe027f-7a92-80e8-9d8e-e61ba82ad2ca" class="bulleted-list"><li style="list-style-type:disc">狮身人面像</li></ul></div></li></ul><ul id="1bfe027f-7a92-80ce-b8ae-f9e64bbca22b" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">可选择骑骆驼 + 拍经典“全景三金字塔”照</span><div class="indented"></div></li></ul><h3 id="1bfe027f-7a92-80be-a1a1-f3d9355393c9" class="">🌤 下午：</h3><ul id="1bfe027f-7a92-80e4-8983-d3705037845a" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">午餐推荐：Nine Pyramids Lounge / 当地餐馆</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8062-95da-cfdaaf1e231c" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">参观【大埃及博物馆GEM】：</span><div class="indented"><ul id="1bfe027f-7a92-80b9-b195-f6403b6e603a" class="bulleted-list"><li style="list-style-type:disc">图坦卡蒙宝藏</li></ul><ul id="1bfe027f-7a92-8014-9199-c334e71f908a" class="bulleted-list"><li style="list-style-type:disc">拉美西斯巨像、太阳船</li></ul><ul id="1bfe027f-7a92-803e-a8aa-f84df297c321" class="bulleted-list"><li style="list-style-type:disc">古埃及日常文物展</li></ul></div></li></ul><h3 id="1bfe027f-7a92-8041-8cfd-eefcb4b754ea" class="">🌙 晚上：</h3><ul id="1bfe027f-7a92-808c-a0f2-d63435380b96" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">回酒店休息，或屋顶欣赏【金字塔声光秀】</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80e6-88ad-f456b97c155b" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">晚餐推荐：</span><div class="indented"><ul id="1bfe027f-7a92-80de-a332-fd125b5d8eda" class="bulleted-list"><li style="list-style-type:disc">Abou Tarek吃地道Koshari</li></ul><ul id="1bfe027f-7a92-80d6-8779-edc9d0e29b70" class="bulleted-list"><li style="list-style-type:disc">El Dar Darak享受烤肉、甜品</li></ul></div></li></ul><hr id="1bfe027f-7a92-8099-8457-dc2aad10afa3"/><h2 id="1bfe027f-7a92-80db-b94c-db57b92e8ad0" class="">✅ <strong>Day 6 | 4月3日（开罗）｜老城区 &amp; 集市体验</strong></h2><h3 id="1bfe027f-7a92-8097-b061-e531c75de320" class="">☀️ 上午：</h3><ul id="1bfe027f-7a92-804f-9b8a-d93125a09134" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">参观【萨拉丁城堡】、【穆罕默德·阿里清真寺】</span><div class="indented"><ul id="1bfe027f-7a92-806e-a8bc-f2ffa0384abf" class="bulleted-list"><li style="list-style-type:disc">山顶俯瞰全开罗</li></ul><ul id="1bfe027f-7a92-8018-823e-ede1b1660119" class="bulleted-list"><li style="list-style-type:disc">内部穹顶/吊灯极美</li></ul></div></li></ul><h3 id="1bfe027f-7a92-805c-b605-c3c99c6cb62c" class="">🌤 下午：</h3><ul id="1bfe027f-7a92-8013-b984-cd3c8a3be58e" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">可选参观：</span><div class="indented"><ul id="1bfe027f-7a92-80f6-93c6-e1bacc174275" class="bulleted-list"><li style="list-style-type:disc">【苏丹哈桑清真寺】</li></ul><ul id="1bfe027f-7a92-8095-9322-d18ea87691fa" class="bulleted-list"><li style="list-style-type:disc">【里法伊清真寺】</li></ul></div></li></ul><ul id="1bfe027f-7a92-80e2-8dc2-e4a0b9b239ad" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">逛【汗·哈利利集市】（Khan El Khalili）</span><div class="indented"><ul id="1bfe027f-7a92-80a3-aed0-d39e2b8b29e4" class="bulleted-list"><li style="list-style-type:disc">购物：香料、纪念品、埃及灯</li></ul><ul id="1bfe027f-7a92-805e-9c17-d9b3fdc5342f" class="bulleted-list"><li style="list-style-type:disc">喝薄荷茶、体验水烟</li></ul></div></li></ul><h3 id="1bfe027f-7a92-8093-8e3b-f506132e4e65" class="">🌙 晚上：</h3><ul id="1bfe027f-7a92-8017-a325-c321668aa1fc" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">可选择：</span><div class="indented"><ul id="1bfe027f-7a92-803b-92db-f6402ebff679" class="bulleted-list"><li style="list-style-type:disc">【尼罗河游船晚餐】（含肚皮舞）</li></ul><ul id="1bfe027f-7a92-8032-a093-dd27fc493bc0" class="bulleted-list"><li style="list-style-type:disc">去Zamalek小岛漫步+街头小吃</li></ul></div></li></ul><ul id="1bfe027f-7a92-80bd-b4fc-f5f2ea3400da" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">晚餐推荐：</span><div class="indented"><ul id="1bfe027f-7a92-802f-b626-e71a0e5d06cb" class="bulleted-list"><li style="list-style-type:disc">Abou El Sid（炖鸽子、molokhia汤）</li></ul><ul id="1bfe027f-7a92-80c6-87d5-e6a3664cc415" class="bulleted-list"><li style="list-style-type:disc">街头Falafel或Shawarma</li></ul></div></li></ul><hr id="1bfe027f-7a92-8004-9a27-f28f415ef038"/><h2 id="1bfe027f-7a92-8065-9ac7-c914e7996cd5" class="">✅ <strong>Day 7 | 4月4日（开罗 → 萨卡拉）｜古埃及的起点</strong></h2><h3 id="1bfe027f-7a92-80c1-8ca1-e01c80bfa09a" class="">☀️ 上午：</h3><ul id="1bfe027f-7a92-80eb-9b11-c75309665fbf" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">包车或打车前往【萨卡拉】：</span><div class="indented"><ul id="1bfe027f-7a92-80a0-aff5-fbda824ef5eb" class="bulleted-list"><li style="list-style-type:disc">参观【阶梯金字塔】（最早的金字塔）</li></ul><ul id="1bfe027f-7a92-8034-a3c0-cc7987620a97" class="bulleted-list"><li style="list-style-type:disc">南墓、祭祀场地</li></ul></div></li></ul><ul id="1bfe027f-7a92-802e-953f-f688a110ff30" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">可选加行程：</span><div class="indented"><ul id="1bfe027f-7a92-806d-b303-eeec57e27f11" class="bulleted-list"><li style="list-style-type:disc">【达舒尔】红色金字塔 / 弯曲金字塔</li></ul></div></li></ul><h3 id="1bfe027f-7a92-80cf-8f05-efa6a9d4e7d6" class="">🌤 下午：</h3><ul id="1bfe027f-7a92-803e-b351-e8622059b743" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">返回开罗市区，最后购物或散步</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-80e9-9e7f-d4e09ec5528f" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">简单午餐（Koshari、披萨或炖菜）</span><div class="indented"></div></li></ul><h3 id="1bfe027f-7a92-8046-8d8a-dca57fad13f2" class="">🌙 晚上：</h3><ul id="1bfe027f-7a92-8039-86eb-de74a6fc3bb8" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">根据返程安排，前往机场/火车站</span><div class="indented"></div></li></ul><ul id="1bfe027f-7a92-8055-b134-f98795f57725" class="to-do-list"><li><div class="checkbox checkbox-off"></div> <span class="to-do-children-unchecked">整理行李、准备登机，Say Goodbye！</span><div class="indented"></div></li></ul><hr id="1bfe027f-7a92-8001-a023-e419f70bd7d7"/></div></article><span class="sans" style="font-size:14px;padding-top:2em"></span></body></html>
