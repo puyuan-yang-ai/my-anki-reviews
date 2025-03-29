@@ -1,0 +1,311 @@
+
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Export Notes by xxhk.org</title>
+<style>
+
+body { font-family: Arial, sans-serif; }
+.card { border: 2px solid #000; padding: 10px; border-radius: 10px; margin-bottom: 20px; }
+img {
+max-width: 100%;
+height: auto;
+border: 1px solid lightgray;
+border-radius: 10px;
+display: inline-block;
+margin: 10px 0px;
+}
+.separator { border-top: 1px dashed #000; margin: 10px 0; }
+.tags { background-color: lightgray; padding: 5px 10px; margin-bottom: 10px; border-radius: 5px; display: inline-block; }
+.footer {
+text-align: center;
+color: grey;
+margin-top: 20px;
+padding: 10px;
+}
+
+.video-container {
+margin: 10px 0;
+}
+.video-placeholder {
+position: relative;
+cursor: pointer;
+}
+.play-button {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+width: 68px;
+height: 48px;
+background-color: rgba(0, 0, 0, 0.7);
+border-radius: 14px;
+cursor: pointer;
+}
+.play-button::before {
+content: '';
+position: absolute;
+top: 50%;
+left: 55%;
+transform: translate(-50%, -50%);
+border-style: solid;
+border-width: 12px 0 12px 20px;
+border-color: transparent transparent transparent white;
+}
+.play-button:hover {
+background-color: red;
+}
+
+</style>
+
+</head>
+<body>
+<div id="cards-container">
+<div class="card">
+<div class="field_0">在不必要的场景下盲目使用 Reasoning 模型，导致什么被引入，直接推高了 Inference 成本。</div>
+<div class="separator"></div>
+<div class="field_1">大量不必要的 CoT Token 。</div>
+</div>
+<div class="card">
+<div class="field_0">在不必要的场景下盲目使用 Reasoning 模型，导致大量不必要的 CoT Token 被引入，直接推高了什么？</div>
+<div class="separator"></div>
+<div class="field_1">&nbsp;Inference 成本。</div>
+</div>
+<div class="card">
+<div class="field_0">CoT&nbsp; 对应的中文和英文名称分别是什么？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">Chain of Thought，思维链</div>
+</div>
+<div class="card">
+<div class="field_0">CoT (Chain of Thought)&nbsp;是一种AI模型的什么方式？</div>
+<div class="separator"></div>
+<div class="field_1">推理方式。</div>
+</div>
+<div class="card">
+<div class="field_0">CoT (Chain of Thought)&nbsp;<br>模型会像什么一样，通过什么过程来得出结论？</div>
+<div class="separator"></div>
+<div class="field_1">会像人类一样，通过步骤性的思考过程来得出结论。</div>
+</div>
+<div class="card">
+<div class="field_0">CoT (Chain of Thought)&nbsp;<br>比如解决数学题时，会先怎么样，而不是直接怎么样？</div>
+<div class="separator"></div>
+<div class="field_1">会先写出推理步骤，而不是直接给出答案.</div>
+</div>
+<div class="card">
+<div class="field_0">Token 是什么的最小单位</div>
+<div class="separator"></div>
+<div class="field_1">文本被切分的最小单位。</div>
+</div>
+<div class="card">
+<div class="field_0">比如 "我喜欢编程" 可能被分成 什么样的token</div>
+<div class="separator"></div>
+<div class="field_1">["我", "喜欢", "编程"] 。</div>
+</div>
+<div class="card">
+<div class="field_0">Inference (推理) 成本指的是什么？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>指运行模型时所需的计算资源</li><li>包括计算时间、内存使用等</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0">Long CoT 模型 指的是什么意思？&nbsp;&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">长格式的思维链模型。</div>
+</div>
+<div class="card">
+<div class="field_0">当使用长格式的思维链模型时，因为什么，所以会产生更长的文本序列（更多的token）。</div>
+<div class="separator"></div>
+<div class="field_1">因为需要输出详细的推理步骤。</div>
+</div>
+<div class="card">
+<div class="field_0">当使用长格式的思维链模型时，因为需要输出详细的推理步骤，所以会怎么样？</div>
+<div class="separator"></div>
+<div class="field_1">所以会产生更长的文本序列（更多的token）。</div>
+</div>
+<div class="card">
+<div class="field_0"><span style="color: rgb(31, 35, 40); background-color: rgb(255, 255, 255);">"压缩输出Token数量的技术"是指什么？</span></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>研究如何让AI模型用更少的文字表达相同的意思</li><li>就像人类写作中的"长话短说"、"简明扼要"</li><li>目标是在保持输出质量的同时减少文字量</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0"><div>由于什么的压力，会出现更多致力于简化AI输出的技术<br></div></div>
+<div class="separator"></div>
+<div class="field_1">计算成本。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>由于计算成本的压力，会出现更多致力于简化什么的技术？<br></div></div>
+<div class="separator"></div>
+<div class="field_1">AI输出。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>输出token越多，确实需要更多的什么？<br></div></div>
+<div class="separator"></div>
+<div class="field_1">计算资源。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>模型的推理成本不仅与输出token数量有关，还与什么有关？<br></div></div>
+<div class="separator"></div>
+<div class="field_1">输入token数量。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>Long to Short Reasoning 的核心目标是什么？<br></div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>压缩推理过程中的文本长度</li><li>保持推理的准确性和完整性</li><li>减少计算资源的消耗</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0"><div>Long to Short Reasoning 这种压缩可以通过多种方式实现，分别是什么？<br></div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>去除冗余信息</li><li>使用更简洁的表达方式</li><li>合并相似或相关的推理步骤</li><li>使用更精炼的语言结构</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0"><div>Long to Short Reasoning 和&nbsp;token压缩 之间是什么关系？<br></div></div>
+<div class="separator"></div>
+<div class="field_1">Long to Short Reasoning 是一种特殊的token压缩应用。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>作为Long to Short Reasoning的发展方向，未来存在哪3种方向。&nbsp;<br></div></div>
+<div class="separator"></div>
+<div class="field_1">智能压缩，<br>可调节输出，<br>多模态推理。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>作为Long to Short Reasoning的发展方向，智能压缩这个方向是什么意思。&nbsp;<br></div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>自动分析推理过程中哪些步骤是必须的</li><li>智能合并或简化推理步骤</li><li>保持推理的完整性的同时减少冗余</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0"><div>作为Long to Short Reasoning的发展方向，可调节输出 这个方向是什么意思。&nbsp;<br></div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>允许用户选择看到多详细的推理过程</li><li>可以在"只看结论"和"看完整推理"之间切换</li><li>适应不同用户的需求</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0"><div>作为Long to Short Reasoning的发展方向，多模态推理 这个方向是什么意思。&nbsp;<br></div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>结合文字、图像等多种形式进行推理</li><li>选择最高效的表达方式</li><li>例如：几何问题可能用图形展示更容易理解</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0"><div>推理过程压缩 (Long to Short Reasoning) 指的是什么？<br></div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>简化推理步骤</li><li>合并相似推理过程</li><li>保持逻辑完整性的同时减少冗余</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0"><div>这些不同的token压缩方式都致力于同一个目标：是什么？<br></div></div>
+<div class="separator"></div>
+<div class="field_1">在保持信息质量的同时减少token使用量，从而降低计算成本。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>LightThinker 由浙大、蚂蚁等发表，其通过动态压缩 什么过程中的什么步骤，提高 LLM 在复杂 Reasoning 任务中的 Inference 效率，同时几乎不影响性能。<br></div></div>
+<div class="separator"></div>
+<div class="field_1">压缩Reasoning 推理过程中的中间思维步骤。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>Inference（推理运算）确实可以理解为什么过程？<br></div></div>
+<div class="separator"></div>
+<div class="field_1">前向传播过程。</div>
+</div>
+<div class="card">
+<div class="field_0"><div>Inference（推理运算）确实可以理解为前向传播过程，包括哪四个步骤？&nbsp;<br></div></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>输入数据进入模型</li><li>数据在网络层间流动</li><li>通过激活函数进行处理</li><li>最终产生输出结果</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0">输入 → 模型处理 → 输出的过程：<br>文本输入："今天天气怎么样？"
+<br>↓
+<br>模型前向传播过程（Inference）【下面三个阶段分别是什么？ 】<br>1 ？
+<br>2 ？
+<br>3 ？
+<br>↓
+<br>输出："今天是晴天，温度25度。"</div>
+<div class="separator"></div>
+<div class="field_1"><pre><code>- 文本标记化(Tokenization)
+- 通过注意力层(Attention Layers)
+- 通过前馈网络(Feed Forward Networks)</code></pre></div>
+</div>
+<div class="card">
+<div class="field_0">Inference的特点是什么？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>只进行前向计算</li><li>不需要反向传播</li><li>不更新模型权重</li><li>比训练过程更快速</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0">推理过程（Inference）和 训练过程，分别的过程分别是什么？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1">训练过程：<br>输入 → 前向传播 → 计算损失 → 反向传播 → 更新权重<br><br>推理过程（Inference）：<br>输入 → 前向传播 → 输出</div>
+</div>
+<div class="card">
+<div class="field_0">为什么Inference成本与输出长度相关？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>每生成一个token都需要一次前向传播</li><li>输出越长，需要的前向传播次数越多</li><li>计算资源消耗随输出长度增加</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0">每生成一个什么都需要一次前向传播</div>
+<div class="separator"></div>
+<div class="field_1">token。</div>
+</div>
+<div class="card">
+<div class="field_0">每生成一个token都需要一次什么？</div>
+<div class="separator"></div>
+<div class="field_1">前向传播。</div>
+</div>
+<div class="card">
+<div class="field_0">压缩输出token能降低什么的成本？</div>
+<div class="separator"></div>
+<div class="field_1">推理Inference的成本。</div>
+</div>
+<div class="card">
+<div class="field_0">Reasoning 和 Inference，两者的中文名称都是推理但是它们实际上有什么不同呢？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><ol><li>Reasoning（推理过程）：</li></ol><ul><li>指的是思维和逻辑分析的过程</li><li>强调如何从已知信息得出结论的思维步骤</li><li>类似于人类解决问题时的思考过程</li></ul><ol><li>Inference（推理运算）：</li></ol><ul><li>指AI模型执行计算的过程</li><li>强调模型在实际运行时的计算操作</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0">做菜的例子 来区别Reasoning 和 Inference。</div>
+<div class="separator"></div>
+<div class="field_1"><br>- Reasoning：确定菜谱步骤，规划烹饪顺序<br>- Inference：实际切菜、炒菜的执行过程</div>
+</div>
+<div class="card">
+<div class="field_0">Reasoning优化 和 Inference优化：分别指的是什么？&nbsp;</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>Reasoning优化：改进思维方法，简化推理步骤</li><li>Inference优化：提高运算效率，减少资源消耗</li></ul><br></div>
+</div>
+<div class="card">
+<div class="field_0">通过动态压缩 Reasoning 过程中的中间思维步骤，提高 LLM 在复杂 Reasoning 任务中的 Inference 效率。这句话里面的四个关键点分别是什么意思？&nbsp;<br><ol><li>Reasoning过程</li><li>中间思维步骤</li><li>动态压缩</li><li>Inference效率&nbsp;</li></ol></div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>Reasoning过程：AI的推理思考过程</li><li>中间思维步骤：推理过程中的每个思考环节</li><li>动态压缩：根据实际情况实时调整压缩程度</li><li>Inference效率：AI模型运行推理时的效率</li></ul></div>
+</div>
+<div class="card">
+<div class="field_0">通过动态压缩 Reasoning 过程中的中间思维步骤，提高 LLM 在复杂 Reasoning 任务中的 Inference 效率。<br>其中，"动态压缩"的特点是什么？</div>
+<div class="separator"></div>
+<div class="field_1"><ul><li>不是固定的压缩规则</li><li>会根据具体问题调整压缩程度</li><li>智能判断哪些步骤可以合并或省略</li><li>保持推理的准确性</li></ul></div>
+</div>
+
+<script>
+document.addEventListener('click', function(e) {
+const container = e.target.closest('.video-container');
+if (!container) return;
+
+const placeholder = container.querySelector('.video-placeholder');
+if (!placeholder) return;
+
+const videoId = container.dataset.videoId;
+const startParam = container.dataset.start || '';
+
+const iframe = document.createElement('iframe');
+iframe.width = '100%';
+iframe.height = '100%';
+iframe.src = `https://www.youtube.com/embed/${videoId}?${startParam.slice(1)}`;
+iframe.title = 'YouTube video player';
+iframe.frameBorder = '0';
+iframe.style.position = 'absolute';
+iframe.style.top = '0';
+iframe.style.left = '0';
+iframe.style.borderRadius = '15px';
+iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+iframe.allowFullscreen = true;
+
+placeholder.innerHTML = '';
+placeholder.appendChild(iframe);
+});
+</script>
+
+</div>
+<div class="footer">Made by <a href="https://xxhk.org">Export Notes - XXHK</a></div>
+</body>
+</html>
+
