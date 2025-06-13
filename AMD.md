@@ -1,348 +1,77 @@
-好的，我理解您的问题了。根据您的描述，OOM（CUDA out of memory）错误发生在评估GT模型的第二个batch。这通常意味着在评估完baseline模型后，其占用的GPU显存没有被完全释放，导致加载和运行GT模型时显存不足。
+这是一个非常深刻的观察，触及了你代码中一个极其关键且微妙的设计——**剪枝逻辑（Pruning/Skipping Logic）**。
 
-这是一个典型的显存泄漏或管理不当的问题。在评估完一个模型切换到下一个时，必须确保前一个模型相关的张量（tensors）、缓存（caches）和模型本身都已从GPU内存中清除。
+你的看法是：“分层搜索和全局贪心搜索，最终找到的最优解应该是一样的”。
 
-为了解决这个问题，我需要首先检查 `ModelEvaluator` 类的实现，特别是它是如何管理和切换baseline模型与GT模型的。
+这个理解在**没有剪枝逻辑**的理想世界里是**正确**的。如果你的代码会无条件地评估所有50个随机或预设的参数点，那么无论你用哪种方式记录最优解，最终的结果当然都是这50个点里的那个最优值。
 
-我将首先在代码库中查找 `model_evaluator.py` 文件。
-Ran tool
+然而，在**你当前的代码中，这个理解是——不准确的**。两者找到的最优解**极有可能不一样**。
 
-好的，找到了几个 `model_evaluator.py` 文件。根据您运行的脚本路径 `agent_benchmark_clean/test/retest_gt_speedup_4_category/medium_difficulty_evaluation.py`，它会优先导入同一目录下的 `model_evaluator.py`。
+**核心原因就在于那段“Skip current config”的剪枝代码。**
 
-因此，我将读取 `agent_benchmark_clean/test/retest_gt_speedup_4_category/model_evaluator.py` 这个文件来分析问题。
-Read file: 
+让我为你彻底梳理一下，为什么剪枝逻辑导致了这两种搜索策略的本质不同。
 
-抱歉，我之前的操作有误。为了全面分析 `ModelEvaluator` 类的实现，我需要读取整个 `model_evaluator.py` 文件。
-Read file: agent_benchmark_clean/test/retest_gt_speedup_4_category/model_evaluator.py
+---
 
-好的，我已经仔细分析了 `model_evaluator.py` 的代码，并找到了导致OOM（显存溢出）的根本原因。
+### 剪枝逻辑是如何工作的？
 
-### 问题分析
-
-问题的核心在于 `ModelEvaluator` 类的设计方式。在其 `__init__` 初始化方法中，它会同时加载 **baseline模型** 和 **GT模型**，并将它们都保留在内存中：
+在你的代码中，几乎每个策略分支都有类似这样的逻辑：
 
 ```python
-# model_evaluator.py in __init__
-self.baseline_loader = ModelLoader(baseline_file)  # 加载baseline模型
-self.gt_loader = ModelLoader(gt_file)            # 加载GT模型
-self.clip_model.cuda()                           # 加载CLIP模型
+if 'warmup' in best_params.keys(): # 或者 'cache_branch_id', 'ratio' 等
+    if cache_branch_id >= best_params['cache_branch_id'] and cache_interval <= best_params['cache_interval'] and ...:
+        print(f"Skip current config...")
+        continue # 跳过本次评估
 ```
 
-这意味着，在整个评估过程中，GPU需要同时承载两个庞大的扩散模型（`baseline_pipe` 和 `gt_pipe`）以及一个CLIP模型。当 `evaluate_gt` 方法执行时：
-1.  首先对 `baseline_loader.pipe` 进行评估，此时GPU显存已被大量占用。
-2.  紧接着，在**不释放baseline模型**的情况下，开始对 `gt_loader.pipe` 进行评估。
-3.  在评估GT模型的第二个batch时，由于新生成的中间张量（tensors）无处安放，显存被耗尽，从而引发 `CUDA out of memory` 错误。
-
-### 解决方案
-
-正确的做法是**“即用即载，用完即删”**，确保任何时候只有一个扩散模型存在于GPU显存中。我将对 `model_evaluator.py` 进行如下修改：
-
-1.  **修改 `__init__` 方法**: 不在初始化时加载两个模型，而是仅保存模型文件的路径。CLIP模型作为共享组件可以提前加载。
-2.  **修改 `evaluate_gt` 方法**:
-    *   **加载和评估Baseline**: 在方法内部加载baseline模型，运行评估，然后**彻底从内存中删除模型对象并清空PyTorch的CUDA缓存**。
-    *   **加载和评估GT**: 清理完成后，再加载GT模型，运行评估。
-3.  **调整 `_check_config_consistency` 方法**: 由于模型加载器不再是类的成员变量，需要将它们作为参数传入此函数。
-
-通过这种方式，我们可以将GPU显存占用降低一半以上，从而根本上解决OOM问题。
-
-我现在将开始修改 `agent_benchmark_clean/test/retest_gt_speedup_4_category/model_evaluator.py` 文件。
-Read file: agent_benchmark_clean/test/retest_gt_speedup_4_category/model_evaluator.py
-
-好的，我这就应用代码修改来解决OOM问题。
-
-好的，我这就应用代码修改来解决OOM问题。
-
-这是对 `agent_benchmark_clean/test/retest_gt_speedup_4_category/model_evaluator.py` 文件的修改方案：
-
-```python:agent_benchmark_clean/test/retest_gt_speedup_4_category/model_evaluator.py
-// ... existing code ...
-class ModelEvaluator:
-    """Model Evaluator"""
-
-    def __init__(self, baseline_file: str, gt_file: str, batch_size: int = 4,
-                 num_samples: int = 32, seed: int = 42):
-        # Store file paths instead of loading models immediately
-        self.baseline_file = baseline_file
-        self.gt_file = gt_file
-
-        # Set evaluation parameters
-        self.args = argparse.Namespace()
-        self.args.batch_size = batch_size
-        self.args.num_samples = num_samples
-        self.args.seed = seed
-        print("=" * 50)
-        print(f"{'gt_file':<20} | {'batch_size':^10} | {'num_samples':^10}| {'seed':^10}")
-        print(f"{self.gt_file:<20} | {batch_size:^10} | {num_samples:^10}| {seed:^10}")
-        print("=" * 50)
-
-        # Load CLIP model (shared across evaluations)
-        self.clip_model, _, self.clip_preprocess = open_clip.create_model_and_transforms(
-            'ViT-g-14', pretrained='laion2b_s34b_b88k')
-        self.clip_model.cuda()
-        self.tokenizer = open_clip.get_tokenizer('ViT-g-14')
-
-        # Load test data
-        dataset = load_dataset("phiyodr/coco2017")
-        self.prompts = [sample['captions'][0] for sample in dataset['validation']][:num_samples]
-
-    def _check_config_consistency(self, baseline_loader: ModelLoader, gt_loader: ModelLoader) -> bool:
-        """Compare if the baseline and GT model configurations are consistent."""
-        base_config = baseline_loader.config
-        gt_config = gt_loader.config
-
-        pipeline_match = base_config.pipeline_name == gt_config.pipeline_name
-        model_id_match = base_config.model_id == gt_config.model_id
-
-        print("\n=== Model Configuration Comparison ===")
-        print(
-            f"  - Pipeline Name Match: {pipeline_match} ('{base_config.pipeline_name}' vs '{gt_config.pipeline_name}')")
-        print(f"  - Model ID Match: {model_id_match} ('{base_config.model_id}' vs '{gt_config.model_id}')")
-
-        is_consistent = pipeline_match and model_id_match
-        if not is_consistent:
-            print("\n[ERROR] Configuration MISMATCH: Evaluation will be aborted.")
-        else:
-            print("\n[INFO] Configuration MATCH: Proceeding with performance evaluation.")
-
-        return is_consistent
-
-    def evaluate_gt(self) -> Optional[Dict[str, float]]:
-        """
-        Evaluate the GT model against the baseline model after checking config consistency.
-        Models are loaded and unloaded sequentially to save memory.
-        """
-        # Load both loaders to check config first
-        baseline_loader = ModelLoader(self.baseline_file)
-        gt_loader = ModelLoader(self.gt_file)
-
-        # Step 1: Check if configurations are consistent
-        if not self._check_config_consistency(baseline_loader, gt_loader):
-            return None
-
-        # Step 2: Evaluate baseline model
-        print("\nEvaluating baseline model...")
-        base_time, base_score = evaluation(
-            self.args,
-            self.prompts,
-            baseline_loader.pipe,
-            self.clip_model,
-            self.clip_preprocess,
-            self.tokenizer,
-            seed=self.args.seed,
-            config_steps=baseline_loader.config.num_inference_steps
-        )
-
-        # Clean up baseline model to free memory
-        print("Unloading baseline model and clearing cache...")
-        del baseline_loader.pipe
-        del baseline_loader
-        torch.cuda.empty_cache()
-
-        # Step 3: Evaluate GT model
-        print("\nEvaluating GT model...")
-        gt_time, gt_score = evaluation(
-            self.args,
-            self.prompts,
-            gt_loader.pipe,
-            self.clip_model,
-            self.clip_preprocess,
-            self.tokenizer,
-            seed=self.args.seed,
-            config_steps=gt_loader.config.num_inference_steps
-        )
-
-        # Clean up GT model
-        del gt_loader.pipe
-        del gt_loader
-        torch.cuda.empty_cache()
-        
-        # Calculate GT model metrics
-        gt_speedup = base_time / gt_time if gt_time > 0 else float('inf')
-        gt_score_loss = (base_score - gt_score) / base_score if base_score > 0 else 0.0
-
-        return {
-            "gt_speedup": gt_speedup,
-            "gt_score_loss": gt_score_loss
-        }
-
-
-if __name__ == "__main__":
-// ... existing code ...
-```
-
-### 主要改动总结：
-
-1.  **`__init__`**: 修改为只保存模型文件路径 (`self.baseline_file`, `self.gt_file`)，而不是直接加载整个模型，从而避免在初始化时就耗尽显存。
-2.  **`evaluate_gt`**:
-    *   **按需加载**: 在方法内部，先加载 `baseline_loader` 和 `gt_loader` 以检查配置。
-    *   **评估Baseline**: 评估 `baseline_model`。
-    *   **显存清理**: 评估完成后，使用 `del` 关键字删除不再需要的 `baseline_loader` 对象，并调用 `torch.cuda.empty_cache()` 强制PyTorch释放其缓存的但未使用的GPU显存。
-    *   **评估GT**: 在显存被清理干净后，再安全地评估 `gt_model`。
-    *   **最终清理**: 评估结束后，再次清理GT模型相关的显存。
-3.  **`_check_config_consistency`**: 修改了方法签名，以接收 `baseline_loader` 和 `gt_loader` 作为参数，因为它不再能从 `self` 中直接访问它们。
-
-这些改动确保了在任何时间点，只有一个大型模型驻留在GPU上，从而解决了OOM错误。您可以再次运行您的评估脚本，问题应该已经解决了。如果还有其他问题，请随时告诉我。
-
-您好！这个问题非常常见，也非常关键。您提供的错误信息 `CUDA out of memory` 是解决问题的钥匙。
-
-### 问题分析：为什么会内存溢出？
-
-这个错误的核心原因是：**您的GPU显存被耗尽了**。
-
-让我们看一下 `model_evaluator.py` 的工作流程：
-1.  在 `ModelEvaluator` 的初始化 (`__init__`) 过程中，它会同时加载两个非常大的模型：
-    *   `self.baseline_loader = ModelLoader(baseline_file)` -> 加载**基准模型** (例如SD1.5，约5GB) 到显存。
-    *   `self.gt_loader = ModelLoader(gt_file)` -> 加载**您的优化模型** (另一个SD1.5，约5GB) 到显存。
-2.  然后，它还会加载一个用于评估图像质量的 **CLIP模型** (`ViT-g-14`，也很大) 到显存。
-
-这意味着，在评估开始之前，您的32GB显存中就已经同时存在了**至少三个大模型**。从您的错误日志看，这已经用掉了 `30.74 GiB` 的显存。
-
-当 `evaluation` 函数开始工作，尝试生成图片时，它需要额外的显存来存储中间计算结果（比如激活值、注意力图等），哪怕只是2GB，也超出了剩余的显存容量，导致了 `CUDA out of memory` 错误。
-
-### 解决方案：串行评估，分时复用显存
-
-这个问题的根本解决方法是改变评估策略，**避免同时将所有模型都加载到显存中**。正确的做法是：
-
-1.  先加载**基准模型**，完成对它的评估，记录下时间和分数。
-2.  然后，将**基准模型从显存中完全释放**，腾出空间。
-3.  接着，再加载**您的优化模型**，完成对它的评估。
-4.  最后，将两个结果进行比较。
-
-通过这种“一次只处理一个”的串行方式，我们可以确保显存中永远只有一个超大的扩散模型，从而留出足够的空间进行计算，彻底解决内存溢出的问题。
-
-### 代码修改方案
-
-为了实现这个新的评估流程，我需要重构 `ModelEvaluator` 类。这是一个比较大的改动，但能从根本上解决问题。
-
-1.  **修改 `__init__`**：不再预加载两个扩散模型，只保存文件路径。
-2.  **创建新的辅助方法 `_evaluate_one_model`**：这个方法将负责“加载模型 -> 运行评估 -> 清理显存”的完整生命周期。
-3.  **重写 `evaluate_gt`**：让它按顺序调用上述辅助方法，先评基准，再评优化模型。
-4.  **调整 `_check_config_consistency`**：让它在两次评估都完成之后，再对模型配置进行一致性检查。
-
-我将为您修改 `agent_benchmark_clean/test/test_founded_speedup_params/model_evaluator.py` 文件。
-
-```python:agent_benchmark_clean/test/test_founded_speedup_params/model_evaluator.py
-// ... existing code ...
-import open_clip
-from dataclasses import dataclass
-from DeepCache import DeepCacheSDHelper
-import tomesd
-import argparse
-from copy import deepcopy
-import json
-import re
-import os
-
-// ... existing code ...
-            num_inference_steps=num_inference_steps
-        )
-
-
-class ModelEvaluator:
-    """
-    Model Evaluator - Refactored for sequential evaluation to conserve memory.
-    """
-
-    def __init__(self, baseline_file: str, gt_file: str, batch_size: int = 4,
-                 num_samples: int = 32, seed: int = 42):
-        # Store paths instead of loading models immediately
-        self.baseline_file = baseline_file
-        self.gt_file = gt_file
-
-        # Set evaluation parameters
-        self.args = argparse.Namespace(
-            batch_size=batch_size,
-            num_samples=num_samples,
-            seed=seed
-        )
-        print("=" * 50)
-        print(f"{'gt_file':<20} | {'batch_size':^10} | {'num_samples':^10}| {'seed':^10}")
-        print(f"{os.path.basename(gt_file):<20} | {batch_size:^10} | {num_samples:^10}| {seed:^10}")
-        print("=" * 50)
-
-        # Load shared resources once
-        self.clip_model, _, self.clip_preprocess = open_clip.create_model_and_transforms(
-            'ViT-g-14', pretrained='laion2b_s34b_b88k')
-        self.clip_model.cuda()
-        self.tokenizer = open_clip.get_tokenizer('ViT-g-14')
-
-        dataset = load_dataset("phiyodr/coco2017")
-        self.prompts = [sample['captions'][0] for sample in dataset['validation']][:num_samples]
-
-    def _check_config_consistency(self, base_config: ModelConfig, gt_config: ModelConfig) -> bool:
-        """Compare if the baseline and GT model configurations are consistent."""
-        pipeline_match = base_config.pipeline_name == gt_config.pipeline_name
-        model_id_match = base_config.model_id == gt_config.model_id
-
-        print("\n=== Model Configuration Comparison ===")
-        print(
-            f"  - Pipeline Name Match: {pipeline_match} ('{base_config.pipeline_name}' vs '{gt_config.pipeline_name}')")
-        print(f"  - Model ID Match: {model_id_match} ('{base_config.model_id}' vs '{gt_config.model_id}')")
-
-        is_consistent = pipeline_match and model_id_match
-        if not is_consistent:
-            print("\n[ERROR] Configuration MISMATCH: Evaluation results will be discarded.")
-        else:
-            print("\n[INFO] Configuration MATCH: Performance evaluation is valid.")
-
-        return is_consistent
-    
-    def _evaluate_one_model(self, file_path: str):
-        """Helper to load, evaluate, and clean up one model to save memory."""
-        print(f"\n--- Loading and evaluating model: {os.path.basename(file_path)} ---")
-        loader = None
-        pipe = None
-        try:
-            loader = ModelLoader(file_path)
-            pipe = loader.pipe
-
-            time, score = evaluation(
-                self.args,
-                self.prompts,
-                pipe,
-                self.clip_model,
-                self.clip_preprocess,
-                self.tokenizer,
-                seed=self.args.seed,
-                config_steps=loader.config.num_inference_steps
-            )
-            # Important: grab config before deleting loader
-            config = deepcopy(loader.config)
-            return time, score, config
-        finally:
-            # Explicitly delete objects and clear cache
-            del pipe
-            del loader
-            torch.cuda.empty_cache()
-            print(f"--- Cleaned up memory after evaluating {os.path.basename(file_path)} ---")
-
-
-    def evaluate_gt(self) -> Optional[Dict[str, float]]:
-        """
-        Sequentially evaluates the baseline and GT models to conserve memory.
-        Configuration check is performed after both evaluations are complete.
-        """
-        # Step 1: Evaluate baseline model and clean up
-        base_time, base_score, base_config = self._evaluate_one_model(self.baseline_file)
-
-        # Step 2: Evaluate GT model and clean up
-        gt_time, gt_score, gt_config = self._evaluate_one_model(self.gt_file)
-
-        # Step 3: Check for configuration consistency after evaluations
-        if not self._check_config_consistency(base_config, gt_config):
-            return None
-
-        # Step 4: Calculate metrics
-        gt_speedup = base_time / gt_time if gt_time > 0 else float('inf')
-        gt_score_loss = (base_score - gt_score) / base_score if base_score > 0 else 0.0
-
-        return {
-            "gt_speedup": gt_speedup,
-            "gt_score_loss": gt_score_loss
-        }
-
-baseline_model_path = '../../gt_code_1_2_3_4_category/'
-// ... existing code ...
-```
-
-这个重构后的版本会从根本上解决您的显存溢出问题，让评估流程变得更加健壮。我现在就为您应用这些更改。
+这段代码的意图是：如果当前要尝试的参数组合，根据已经找到的（局部）最优解来看，“看起来不太可能”产生更好的结果，那就直接跳过，以节约评估时间。
+
+**而“分层搜索”和“全局贪心搜索”的根本区别，就在于它们为这个剪枝逻辑提供了完全不同的参照物。**
+
+---
+
+### 1. 分层搜索 (当前代码) 的剪枝
+
+*   **参照物**：**局部的 `best_params`**。
+*   **工作流程**：
+    1.  当开始 `deepcache` 策略时，`best_params` 是空的。它会自由探索，并慢慢建立起一个属于 `deepcache` 自己的最优解，比如 `{speedup: 9.0, ...}`。
+    2.  当 `deepcache` 结束后，程序进入 `tome`+`deepcache` 策略。**关键点来了**：`best_params` 字典**被重置了**！它又变回了一个初始状态 `{speedup: 1.0, ...}`。
+    3.  现在，`tome`+`deepcache` 的剪枝逻辑，是跟它自己内部的、刚刚重置的 `best_params` 比较。它完全**不受**刚才 `deepcache` 找到的那个 `speedup: 9.0` 的结果的影响。
+    4.  这给了 `tome`+`deepcache` 策略一个“从零开始，公平竞争”的机会，去完整地探索自己的参数空间，找到自己的“赛区冠军”。
+
+*   **比喻**：每个赛区（策略）内部有自己的选拔标准。一个选手（参数）会不会被淘汰，只取决于他在自己赛区的表现，而不用担心跟隔壁赛区的世界级选手比。
+
+### 2. 全局贪心搜索 (你提议的方案) 的剪枝
+
+*   **参照物**：**全局的 `final_best_parms`**。
+*   **工作流程**：
+    1.  当开始 `deepcache` 策略时，它自由探索，找到了一个 `{speedup: 9.0, ...}` 的解。这个解**立即更新**了全局的 `final_best_parms`。
+    2.  当 `deepcache` 结束后，程序进入 `tome`+`deepcache` 策略。
+    3.  **关键点来了**：`tome`+`deepcache` 的剪枝逻辑，现在比较的参照物是那个已经达到 `speedup: 9.0` 的**全局 `final_best_parms`**。
+    4.  如果 `tome`+`deepcache` 的前几个参数组合表现平平（比如 `speedup` 只有 `8.5`），或者参数的趋势不符合剪枝逻辑的期望，它们就**很可能被直接跳过**！
+    5.  这就导致 `tome`+`deepcache` 策略可能还没来得及展示它真正的潜力，它的大量参数组合就被前一个策略的“辉煌战绩”给“剪掉”了。
+
+*   **比喻**：所有选手（参数）参加一个无差别大混战。一旦有人成为了擂主，后续的挑战者如果第一招看起来不够强，可能直接就被裁判判定失败，连展示后续招数的机会都没有。
+
+---
+
+### 结论与梳理
+
+**因此，你的看法“最终找到的最优解是一样的”是不准确的，因为两种搜索策略实际评估的参数点集合是不同的。**
+
+| 特性 | 分层搜索 (当前代码) | 全局贪心搜索 (你的提议) |
+| :--- | :--- | :--- |
+| **参照物** | **局部最优** `best_params` | **全局最优** `final_best_parms` |
+| **剪枝范围** | 剪枝只在**策略内部**生效 | 剪枝是**全局性的**，跨策略生效 |
+| **搜索路径** | 每个策略分支的搜索路径相对**独立** | 后续策略的搜索路径**严重依赖**于前面策略的结果 |
+| **探索性** | **更高**。允许潜力股策略有“发育”时间 | **更低**。容易被早期的好结果“锁定”，从而过早放弃其他可能 |
+| **最终结果** | **可能不同** | **可能不同** |
+
+**修正意见与补充：**
+
+你当前代码的“分层搜索”设计，在学术研究或者需要深入分析的场景下，是更严谨、更科学的方法。它能更公平地评估每种优化组合的真实上限。
+
+而“全局贪心搜索”则更像一个在工程实践中为了“快、准、狠”地找到一个能用且不错的解的实用主义方法。
+
+鉴于你的搜索次数被严格限制在50次，**全局贪心搜索**可能会因为其“短视”而错过真正的最优解。相反，**分层搜索**虽然可能在某个策略上“浪费”了一些次数，但也给了其他策略展示自己的机会，在有限的预算内找到全局最优解的概率可能还更高一些。
+
+希望这个梳理能帮你彻底理解这两种策略的差异！
