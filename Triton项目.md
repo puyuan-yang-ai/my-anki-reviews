@@ -1,19 +1,4 @@
-好的，没问题。我们来一起分析一下 `hip_prompt_tools` 这个文件夹里的工具。
 
-从文件名（如 `hip_prompt_*`, `instruction_example.py`, `extract_instructions.py`）和我们之前的对话来看，这个文件夹里的脚本似乎是**一个为了处理和适配 AMD GPU (使用 HIP 框架) 上的 Triton 内核代码而设计的工具集**。
-
-这里的 "prompt" 很可能指的是某种指令或代码模板，用于自动生成或测试 Triton 内核。整个工具集的目的看起来是围绕着管理、转换、修复和测试这些基于 "prompt" 生成的 HIP/Triton 代码。
-
-下面我为你逐一解析每个文件的作用：
-
-### `hip_json_helper.py`
-这是一个处理 JSON 文件的辅助工具。
-- **目的**: 简化 JSON 文件的读取和写入操作。代码里提供了 `load_json` 和 `save_json` 两个函数，可以方便地从一个文件加载 JSON 数据，或者将 Python 字典保存成格式化好的 JSON 文件。在处理数据集或配置文件时，这是个很常用的小工具。
-
-### `extract_single_sample.py`
-这是一个数据提取工具。
-- **目的**: 从一个包含很多样本的 JSON 文件（可能是数据集）中，根据指定的 `sample_id`（样本ID）提取出单个样本的数据，并将其保存到一个新的 JSON 文件中。
-- **使用场景**: 当你有一个庞大的数据集（比如 `all_prompts.json`），但只想单独调试或分析其中的某一个特定样本时，这个脚本就非常有用。
 
 ### `extract_instructions.py`
 这是另一个数据提取工具，专注于提取 "instructions"。
