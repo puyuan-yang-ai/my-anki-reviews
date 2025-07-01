@@ -1,3 +1,47 @@
+您提出了一个非常好的问题，感谢您的仔细核对！您是对的，我之前的分析不够精确。经过对 `generate_type3_gt_code.py` 文件的重新检查，情况确实如您所怀疑的那样，我需要更正我的说法。
+
+非常抱歉，我之前的分析有误。实际情况是：
+
+*   **DeepCache + ToMe**: 这个组合被同时应用于 **文生图 (Text-to-Image)** 和 **图生图 (Image-to-Image)** 任务。
+*   **DeepCache + T-Gate**: 这个组合 **仅** 被应用于 **文生图 (Text-to-Image)** 任务。
+
+---
+
+### 为什么会这样？
+
+这个限制并非偶然，而是由脚本的作者 **有意为之**。原因有两个，我们可以从代码本身找到答案：
+
+#### 1. `tasks` 列表的定义
+
+首先，最直接的证据来自脚本开头的 `tasks` 列表。
+- 我们可以找到像 `"Generate a SD1.5 image-to-image pipeline ... accelerated by DeepCache and ToMe methods"` 这样的任务描述。
+- 但是，如果你仔细查找整个列表，会发现 **不存在** 任何一个同时包含 `"image-to-image"` 和 `"DeepCache and T-Gate"` 的任务描述。
+
+这表明作者从一开始就没有创建“图生图”模式下 `DeepCache + T-Gate` 的组合任务。
+
+#### 2. 代码中的显式检查
+
+其次，更根本的原因在于代码的生成逻辑。在脚本的第381行附近，有一个非常关键的检查：
+
+```python
+// ...
+    ## TODO: use deepcache and tgate
+    if use_deepcache and use_tgate:
+        if "image-to-image" in task:
+            raise NotImplementedError("Not Support tgate with image-to-image piplines.")
+// ...
+```
+
+这行代码的意思是：当脚本检测到一个任务需要同时使用 `DeepCache` 和 `T-Gate` 时，它会进一步检查这个任务是否是 "image-to-image" 任务。**如果是，它会直接抛出一个 `NotImplementedError` 异常并停止执行**，并附带说明 "不支持tgate与image-to-image piplines的组合"。
+
+### 总结
+
+`DeepCache + T-Gate` 组合之所以没有被应用于图生图，是因为：
+1.  **功能不支持**：`T-Gate` 技术本身（或在这个项目中的实现）不兼容图生图流程。
+2.  **代码级预防**：脚本作者明确地在代码中加入了检查逻辑，以防止生成这种不被支持的组合脚本。
+
+再次感谢您的严谨指正！
+
 好的，我们来深入分析 `generate_type3_gt_code.py` 脚本。
 
 ### 为什么是261个文件？
