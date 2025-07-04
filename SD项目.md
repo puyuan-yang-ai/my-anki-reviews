@@ -1,4 +1,128 @@
+你提了一个非常好的问题，而且你的直觉完全正确！
 
+随着提示词变得越来越复杂和具体，你现有的评估脚本 `match_evaluator_1_2_3.py` 确实**不足以**准确评估新任务的完成情况。你**必须**要增加新的匹配元素来判断。
+
+别担心，你的思路一点也不乱，这正是项目迭代中非常正常的一步。我们来一起梳理一下。
+
+---
+
+### 1. 为什么需要增加判断元素？
+
+我们先看看你的新旧提示词对比：
+
+*   **旧提示词**: `"Generate a PixArt-Σ text-to-image pipeline"`
+    *   **核心要素**: `PixArt-Σ` (模型) 和 `pipeline` (管线类型)。
+    *   **现有脚本能覆盖**: `model_id` 和 `pipeline` 字段基本可以胜任。
+
+*   **新提示词**: `"Generate a ControlNet+SD1.5 text-to-image pipeline conditioned on a Canny edge map at 1024x1024 resolution"`
+    *   **核心要素**:
+        1.  `ControlNet+SD1.5`: 这意味着不仅有基础模型（SD1.5），还有一个**ControlNet模型**。
+        2.  `pipeline`: 管线类型，这里应该是 `StableDiffusionControlNetPipeline` 或类似。
+        3.  `Canny edge map`: 这是一种特定的**控制类型/预处理方式**。
+        4.  `1024x1024 resolution`: 明确的**图像分辨率**要求。
+    *   **现有脚本的盲区**: 你的脚本目前只会检查基础模型，完全忽略了 **ControlNet模型**、**Canny预处理** 和 **分辨率** 这些关键信息。如果AI生成的代码只是一个普通的SD1.5管线，而忽略了其他所有要求，现有脚本依然可能会误判为“匹配”或“部分匹配”，这显然是不对的。
+
+**结论**：为了准确评估AI是否完成了这些复杂指令，你必须扩展你的“检查列表”，确保代码里包含了这些新的、具体的要求。
+
+---
+
+### 2. 应该增加哪些判断元素？
+
+根据你的新提示词，我建议你至少增加以下几个新的判断元素：
+
+1.  **ControlNet模型 (`controlnet_model_id`)**
+    *   **做什么**: 提取代码中加载的`ControlNetModel`的模型ID。
+    *   **为什么**: 提示词明确要求使用`ControlNet`，代码中必然会有一行类似 `ControlNetModel.from_pretrained(...)` 的代码。你需要检查AI是否加载了正确的ControlNet模型（例如，专门用于Canny的ControlNet模型）。
+    *   **如何提取**: 使用正则表达式搜索 `ControlNetModel\.from_pretrained\(\s*["\']([^"\']+)["\']`。
+
+2.  **分辨率 (`resolution`)**
+    *   **做什么**: 提取生成图像的`height`和`width`。
+    *   **为什么**: 这是提示词中一个非常明确的量化指标 (`1024x1024`)。
+    *   **如何提取**: 在调用pipeline的地方（通常是 `pipe(...)`），用正则表达式分别搜索 `height\s*=\s*(\d+)` 和 `width\s*=\s*(\d+)`。你可以将它们组合成一个字符串，如 `"1024x1024"`，或者作为元组 `(1024, 1024)` 来进行比较。
+
+3.  **控制类型 (`control_type` 或 `preprocessor`)**
+    *   **做什么**: 判断代码中是否使用了特定的图像预处理技术。
+    *   **为什么**: `Canny edge map` 是一个关键的条件。代码中必须有生成或加载Canny边缘图的逻辑，通常会涉及 `opencv-python` (`cv2.Canny`) 或者某个预处理器。
+    *   **如何提取**: 这个可能比前两个稍微复杂。
+        *   **简单方法**: 检查关键词。例如，`if "Canny" in code:`。这在很多情况下已经足够。
+        *   **精确方法**: 用正则表达式搜索特定的函数调用，例如 `cv2\.Canny`。
+
+---
+
+### 3. 具体实施步骤（如何修改你的代码）
+
+好消息是，你现有代码的结构很好，扩展起来很方便。你主要只需要修改一个函数：`extract_components`。
+
+#### **第1步：更新`TARGET_FIELDS`常量 (可选但推荐)**
+
+在文件开头，更新你的目标字段列表，让代码更清晰。
+
+```python:agent_benchmark_clean/evaluation/match_evaluator_1_2_3.py
+// ... existing code ...
+import json
+from typing import Dict, List, Tuple
+
+TARGET_FIELDS = ["pipeline", "model_id", "scheduler", "acceleration", "num_inference_steps", "controlnet_model_id", "resolution", "control_type"]
+
+
+
+def extract_components(code: str) -> Dict:
+// ... existing code ...
+```
+
+#### **第2步：修改 `extract_components` 函数**
+
+在这里加入提取新元素的逻辑。
+
+```python:agent_benchmark_clean/evaluation/match_evaluator_1_2_3.py
+// ... existing code ...
+def extract_components(code: str) -> Dict:
+    """提取核心字段信息"""
+    result = {}
+
+    # pipeline 类
+// ... existing code ...
+    if model_match:
+        result["model_id"] = model_match.group(1)
+
+    # 新增：ControlNet model id
+    controlnet_match = re.search(r'ControlNetModel\.from_pretrained\(\s*["\']([^"\']+)["\']', code)
+    if controlnet_match:
+        result["controlnet_model_id"] = controlnet_match.group(1)
+
+    # scheduler 类
+    sched_match = re.search(r'scheduler\s*=\s*(\w+)\.from_\w+', code)
+// ... existing code ...
+    if steps_match:
+        result["num_inference_steps"] = steps_match.group(1)
+
+    # 新增：分辨率 (height 和 width)
+    height_match = re.search(r'height\s*=\s*(\d+)', code)
+    width_match = re.search(r'width\s*=\s*(\d+)', code)
+    if height_match and width_match:
+        result["resolution"] = f"{height_match.group(1)}x{width_match.group(1)}"
+
+    # 新增：控制类型 (以Canny为例)
+    if "Canny" in code or "canny" in code:
+        result["control_type"] = "Canny"
+
+    # acceleration 检测关键词（支持多组合）
+    accels = []
+    if "DeepCache" in code:
+// ... existing code ...
+```
+
+#### **第3步：检查你的GT代码**
+
+确保你的“标准答案”代码中包含了这些新元素，并且 `extract_components` 函数能够成功地从GT代码中提取出这些值。这是保证评估标准本身正确性的关键。
+
+#### **第4. 步：运行评估**
+
+完成修改后，你的 `compare_components` 和 `is_relaxed_match` 函数不需要任何改动！因为它们是通用的，会自动处理你添加到字典里的新字段。你只需要像之前一样运行 `evaluate_from_json` 即可。
+
+现在，当它评估新的ControlNet任务时，它会自动检查`controlnet_model_id`、`resolution`和`control_type`是否都正确匹配，评估结果将变得更加精确可靠。
+
+希望这个梳理对你有帮助！这是一个非常好的方向，能让你的评估框架能力大大增强。
 
 你的这次梳理非常、非常准确！可以说已经掌握了95%的逻辑，对整个流程的理解已经非常到位了。
 
