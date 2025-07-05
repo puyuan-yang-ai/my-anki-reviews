@@ -1,3 +1,55 @@
+好的，我来分析一下您提出的问题，并提供相应的修改思路和方案。
+
+### 问题分析
+
+您指出的问题非常准确。当前 `extract_components` 函数在提取推理步数时，硬编码了对 `num_inference_steps` 参数的查找，这导致当代码中使用其他常见变体（如 `inference_step` 或 `num_step`）来定义推理步数时，函数无法正确提取该信息，使得函数的鲁棒性不足。
+
+### 目标
+
+我们的目标是增强 `extract_components` 函数，使其能够兼容以下几种常见的推理步数参数命名：
+1.  `num_inference_steps` (已支持)
+2.  `inference_step`
+3.  `num_step`
+
+提取到数值后，我们仍然将其统一存放在返回字典的 `num_inference_steps` 字段中，以确保下游的比较逻辑能够保持一致，无需改动。
+
+### 修改方案建议
+
+我建议采用**组合正则表达式**的方案来解决这个问题。这是最简洁且高效的做法，只需修改一行代码即可。
+
+**核心思路**：
+我们将构建一个更通用的正则表达式，使用 `|` (逻辑或) 操作符来匹配多种可能的参数名。
+
+修改后的正则表达式为：
+`r'(?:num_inference_steps|inference_step|num_step)\s*=\s*(\d+)'`
+
+**正则表达式解析**:
+*   `(?:...)`: 这是一个非捕获分组，用于将多个候选项组合在一起，而不会作为独立的匹配结果返回。
+*   `num_inference_steps|inference_step|num_step`: `|` 表示“或”，所以这个部分会匹配这三个字符串中的任意一个。`re.search()` 会在代码中查找第一个出现的匹配项。
+*   `\s*=\s*`: 匹配等号，以及等号两边可能存在的任意数量的空白字符。
+*   `(\d+)`: 这是一个捕获分组，用于捕获我们真正需要的推理步数值（一个或多个数字）。
+
+这个方案不仅代码改动小，而且扩展性好。如果将来需要支持更多的别名，只需在这个正则表达式中添加即可。
+
+下面是具体的代码修改：
+
+```python:agent_benchmark_clean/evaluation/match_evaluator_1_2_3.py
+// ... existing code ...
+    if sched_match:
+        result["scheduler"] = sched_match.group(1)
+
+    # 推理步数
+    steps_match = re.search(r'(?:num_inference_steps|inference_step|num_step)\s*=\s*(\d+)', code)
+    if steps_match:
+        result["num_inference_steps"] = steps_match.group(1)
+        
+    # 像素的宽和高
+    height_match = re.search(r'height\s*=\s*(\d+)', code)
+// ... existing code ...
+```
+
+我已经将修改应用到了 `extract_components` 函数中。通过这一改动，函数现在能够更灵活地从代码中提取推理步数，提高了评估脚本的健壮性。
+
 好的，非常感谢您提供这个重要的补充信息！您同事的反馈是关键，因为它涉及到这个领域内的一种“约定俗成”的知识。
 
 现在，基于“`PixArt-Σ`就是唯一指向`PixArt-alpha/PixArt-Sigma-XL-2-1024-MS`”这个新前提，我的看法会发生改变。让我重新为您分析：
