@@ -1,273 +1,100 @@
-好的，我将严格按照前面的方案来修改这两个Shell脚本。首先修改 `run_match_evaluator_1_2_3_without_quality.sh`：
-现在修改 `run_match_evaluator_1_2_3_with_quality.sh`：
-现在让我为您梳理一下修改后的内容，以便您进行 double check：
+好的，没问题。我们来详细梳理一下 `agent_benchmark_clean/evaluation/model_evaluator_4.py` 这个文件的评估逻辑。
 
-## 修改内容总结
+这个脚本的核心目标是：**自动化地评估一个AI生成的代码（加速后的模型）相比于一个基线代码（Baseline），在模型配置一致的前提下，是否达到了指定的性能（加速比）和质量要求。**
 
-### 两个文件的共同修改模式
+下面我们从输入、处理流程和输出来详细解析。
 
-#### 修改点1：**添加配置区块**
-在脚本顶部添加了清晰的配置区块：
-```bash
-# ================== CONFIGURATION ==================
-# 将所有可变路径都定义在这里
-GEN_CODE_DIR="../gen_code/gen_code_direct/gen_result_simple_ps_5_gen_6_claude-4_0"
-OUTPUT_REPORT_PATH="../config_data/eval_1_2_3_[without_]quality/ps_5_gen_6_claude-4_0.json"
-LOG_DIR="logs/eval_1_2_3_[without_]quality"
-# ===================================================
-```
-
-#### 修改点2：**使用变量创建目录**
-```bash
-# 之前：
-mkdir -p logs/eval_1_2_3_without_quality
+### 1. 输入
 
-# 现在：
-mkdir -p "$LOG_DIR"
-```
+脚本的输入主要分为两部分：命令行参数和数据文件。
 
-#### 修改点3：**使用变量构建日志文件路径**
-```bash
-# 之前：
-LOG_FILE="logs/eval_1_2_3_without_quality/${TIMESTAMP}.log"
+#### A. 命令行参数 (argparse)
 
-# 现在：
-LOG_FILE="${LOG_DIR}/${TIMESTAMP}.log"
-```
+这些参数用于控制评估过程的细节：
+-   `--batch_size`: 评估时使用的批处理大小。
+-   `--num_samples`: 用于评估的样本数量（提示词数量）。
+-   `--max_samples`: (可选) 用于快速测试，限制处理的最大任务数量。
+-   `--req_score_loss_threshold`: 允许的最大相对质量损失阈值，默认为 `0.05` (即5%)。
+-   `--margin`: 加速比的容忍度，默认为 `1.0`，表示必须达到100%的目标。
+-   `--seed`: 随机种子，确保评估的可复现性。
+-   `--anno_json_path`: **标注文件**的路径 (e.g., `anno_4.json`)。
+-   `--gen_json_path`: **AI生成的代码信息文件**的路径 (e.g., `gen_4.json`)。
+-   `--output_json_path`: 保存评估结果的JSON文件路径。
+-   `--gt_code_dir`: **标准答案 (Ground Truth) 代码**所在的目录。
+-   `--gen_code_dir`: **AI生成的代码**所在的目录。
 
-#### 修改点4：**使用变量进行状态输出**
-```bash
-# 之前：
-echo "Output report path: ../config_data/eval_1_2_3_without_quality/ps_5_gen_6_claude-4_0.json"
+#### B. 核心数据文件
 
-# 现在：
-echo "Output report path: $OUTPUT_REPORT_PATH"
-```
+-   **标注文件 (`anno_4.json`)**: 定义了评估任务。每个条目包含：
+    -   `prompt_id`: 任务的唯一标识。
+    -   `prompt_context`: 描述任务的自然语言文本，其中包含了**目标加速比** (e.g., "achieve a 10.5x speedup")。
+    -   `path_to_gt_code`: 标准答案模型的代码路径。
+    -   `difficulty`: 任务难度 (e.g., "hard")。
 
-#### 修改点5：**使用变量执行Python命令**
-```bash
-# 之前：
-nohup time python -u match_evaluator_1_2_3_without_quality.py \
-  --gen_code_dir ../gen_code/gen_code_direct/gen_result_simple_ps_5_gen_6_claude-4_0 \
-  --output_report ../config_data/eval_1_2_3_without_quality/ps_5_gen_6_claude-4_0.json \
+-   **生成代码信息文件 (`gen_4.json`)**: 记录了AI针对每个任务生成的结果。每个条目包含：
+    -   `prompt_id`: 对应标注文件中的任务ID。
+    -   `path_to_gen_code`: AI生成的**加速后模型**的代码路径。
+    -   `path_to_gen_code_baseline`: AI生成的**基线模型**的代码路径。
 
-# 现在：
-nohup time python -u match_evaluator_1_2_3_without_quality.py \
-  --gen_code_dir "$GEN_CODE_DIR" \
-  --output_report "$OUTPUT_REPORT_PATH" \
-```
+### 2. 核心处理流程
 
-### 两个文件的具体差异
+整个评估流程可以分为三个主要步骤：数据准备、单任务循环评估、汇总输出。
 
-1. **`run_match_evaluator_1_2_3_without_quality.sh`**：
-   - `OUTPUT_REPORT_PATH` 包含 `without_quality` 路径
-   - `LOG_DIR` 包含 `without_quality` 路径
-   - 保留了 `--limit 10` 参数
+#### A. 数据准备 (`load_and_prepare_evaluation_data` 函数)
 
-2. **`run_match_evaluator_1_2_3_with_quality.sh`**：
-   - `OUTPUT_REPORT_PATH` 包含 `with_quality` 路径
-   - `LOG_DIR` 包含 `with_quality` 路径
-   - 保留了注释掉的 `--limit 10` 参数
+1.  读取 `anno_4.json` 和 `gen_4.json`。
+2.  以 `prompt_id` 为键，创建一个名为 `evaluation_pairs` 的字典。
+3.  这个字典将每个任务所需的所有信息整合在一起，包括：
+    -   标准模型路径 (`gt_path`)
+    -   生成模型路径 (`gen_path`)
+    -   基线模型路径 (`baseline_path`)
+    -   任务描述 (`prompt_context`)
+    -   任务难度 (`difficulty`)
 
-## 修改验证要点
+#### B. 单任务评估 (`evaluate_single_task` 函数)
 
-1. **严格遵循方案**: ✅ 完全按照配置变量化的方案进行修改
-   - ✅ 添加了清晰的配置区块
-   - ✅ 将所有重复的路径都提取为变量
-   - ✅ 在所有使用路径的地方都替换为变量引用
+这是整个脚本的核心，它会遍历 `evaluation_pairs` 中的每一个任务并执行以下评估逻辑：
 
-2. **解决重复问题**: ✅ 您指出的JSON路径重复问题完全解决
-   - ✅ `OUTPUT_REPORT_PATH` 只定义一次，使用两次
-   - ✅ 其他路径也避免了重复
+1.  **提取目标加速比**: 使用正则表达式从 `prompt_context` 文本中匹配并提取出需要达到的**目标加速比**（例如，从 "achieve a 9.5x speedup" 中提取出 `9.5`）。
 
-3. **不添加额外功能**: ✅ 只进行了变量化改造，没有添加任何其他功能
+2.  **配置一致性检查 (`compare_model_configs` 函数)**: 这是性能评估前的关键一步，确保比较是在“公平”的环境下进行。
+    -   它会分别加载**生成模型** (`gen_path`)、**标准模型** (`gt_path`) 和**基线模型** (`baseline_path`) 的代码，并从中提取出模型配置（如 `pipeline_name`, `model_id`, `scheduler_name`, `num_inference_steps`）。
+    -   **检查1 (Baseline vs. GT)**: 验证**基线模型**和**标准模型**的配置是否完全一致。这是为了保证我们用来作比较的"起点"是正确的。
+    -   **检查2 (Gen vs. GT)**: 验证**生成模型**和**标准模型**的核心配置（`pipeline_name` 和 `model_id`）是否一致。这是为了保证AI没有用错基础模型。
+    -   只有当**两个检查都通过**时，`is_same_config` 才为 `True`，才会继续进行性能评估。否则，任务直接判定为失败，失败原因为 `config_mismatch`。
 
-4. **保持功能一致**: ✅ 脚本的执行逻辑和原有功能完全相同
+3.  **性能评估 (`ModelEvaluator` 类)**: 如果配置检查通过：
+    -   实例化 `ModelEvaluator`，它会加载**基线模型**和**加速后模型**。
+    -   调用其 `evaluate` 方法，该方法内部会：
+        -   调用通用的 `evaluation` 工具函数，使用固定的 prompts 和 seed，分别运行**基线模型**和**加速后模型**。
+        -   记录并返回两个模型的**平均推理时间**（`base_time`, `acc_time`）和**CLIP图像质量得分**（`base_score`, `acc_score`）。
+    -   根据返回的时间和得分，计算出**实际加速比** (`speedup = base_time / acc_time`) 和**相对质量损失** (`score_loss = (base_score - acc_score) / base_score`)。
 
-## 使用优势
+4.  **结果判定**:
+    -   **加速比判定**: `实际加速比 >= 目标加速比 * margin`
+    -   **质量判定**: `相对质量损失 <= req_score_loss_threshold`
+    -   只有当**加速比**和**质量**两个条件都满足时，该任务最终才被判定为 `PASSED`。
+    -   如果任务难度为 "hard"，还会额外计算一个**达成率** (`achievement_rate = min(1.0, 实际加速比 / 目标加速比)`)，用于衡量优化的程度。
 
-现在当您需要修改路径时：
-- **修改输出报告路径**：只需修改 `OUTPUT_REPORT_PATH` 变量
-- **修改生成代码目录**：只需修改 `GEN_CODE_DIR` 变量  
-- **修改日志目录**：只需修改 `LOG_DIR` 变量
+5.  **错误处理**: 整个过程用 `try...except` 包裹，能捕获代码文件为空、找不到加速比要求、评估过程出错等异常，并记录对应的失败原因。
 
-所有相关的地方都会自动使用新的值，大大提高了维护性和减少了出错的可能性。
+#### C. 汇总与输出
 
-您提的这个想法非常好，这是一个非常专业的Shell脚本编写习惯。我完全赞成您的看法。
+1.  所有任务评估完成后，调用 `print_performance_summary` 在控制台打印一个清晰的**性能总结表格**。
+2.  计算并打印所有任务的**最终通过率**。
+3.  如果存在 "hard" 难度的任务，会计算并打印这些任务的**平均达成率**。
+4.  将包含每个任务详细评估信息（输入路径、配置检查结果、性能数据、是否通过、失败原因等）的列表 `all_evaluation_results` 保存到 `--output_json_path` 指定的JSON文件中。
 
-### 您的想法为什么好？
+### 3. 输出
 
-1.  **可维护性 (Maintainability)**：当您需要修改这个路径时（比如换一个模型或换一个数据集），您只需要在脚本顶部修改**一个地方**，而不是在代码中找两处、三处甚至更多地方。这大大降低了维护成本。
-2.  **减少错误 (Reduced Errors)**：手动维护多个相同的字符串很容易出错。比如，您可能只改了 `echo` 里的路径，却忘了改 `--output_report` 参数里的路径，导致日志和实际运行不一致，这会给调试带来很大困扰。
-3.  **可读性 (Readability)**：将所有可配置的路径、参数等作为变量定义在脚本的顶部，可以让脚本的“配置区”和“执行区”一目了然地分开。其他人（或者未来的您）在阅读脚本时，可以立刻了解这个脚本的核心配置是什么。
+-   **控制台输出**:
+    -   每个任务评估过程的详细日志。
+    -   所有任务完成后的一张总结表。
+    -   最终的通过率和（可选的）平均达成率。
+-   **JSON 文件输出 (`evaluation_results.json`)**:
+    -   一个包含所有任务评估结果的JSON数组。每个对象都是一个任务的详细记录，方便后续进行数据分析和存档。
 
-### 修改思路
-
-我的修改思路完全遵循您的想法，并且可以稍微扩展一下，让脚本变得更完美：
-
-1.  **定义核心变量**：
-    在脚本的顶部，`export` 命令之后，定义几个核心变量来存储所有的路径：
-    -   `OUTPUT_REPORT_PATH`：存储您指出的JSON报告路径。
-    -   `GEN_CODE_DIR`：存储生成代码的目录路径。
-    -   `LOG_DIR`：存储日志文件的目录路径。
-
-2.  **在脚本中使用变量**：
-    -   在 `mkdir` 命令中使用 `$LOG_DIR`。
-    -   在 `LOG_FILE` 的定义中使用 `$LOG_DIR`。
-    -   在 `echo` 命令中使用 `$OUTPUT_REPORT_PATH`。
-    -   在 `python` 命令的 `--output_report` 参数中使用 `$OUTPUT_REPORT_PATH`。
-    -   在 `python` 命令的 `--gen_code_dir` 参数中使用 `$GEN_CODE_DIR`。
-
-**修改后的脚本结构看起来会是这样：**
-
-```bash
-#!/bin/bash
-
-export CUDA_VISIBLE_DEVICES=3
-
-# ================== CONFIGURATION ==================
-# 将所有可变路径都定义在这里
-GEN_CODE_DIR="../gen_code/gen_code_direct/gen_result_simple_ps_5_gen_6_claude-4_0"
-OUTPUT_REPORT_PATH="../config_data/eval_1_2_3_without_quality/ps_5_gen_6_claude-4_0.json"
-LOG_DIR="logs/eval_1_2_3_without_quality"
-# ===================================================
-
-# 创建logs目录
-mkdir -p "$LOG_DIR"
-
-# ... 生成时间戳和日志文件名 ...
-LOG_FILE="${LOG_DIR}/${TIMESTAMP}.log"
-
-# 使用变量进行输出
-echo "Output report path: $OUTPUT_REPORT_PATH"
-echo "Log file: $LOG_FILE"
-
-# 使用变量执行命令
-nohup time python -u match_evaluator_1_2_3_without_quality.py \
-  --gen_code_dir "$GEN_CODE_DIR" \
-  --output_report "$OUTPUT_REPORT_PATH" \
-  --limit 10 \
-  2>&1 | tee "$LOG_FILE" &
-
-# ...
-```
-
-这个方案不仅解决了您指出的重复问题，还顺便把其他路径也变量化了，让整个脚本变得非常干净和易于维护。
-
-您觉得将所有路径都用变量来管理的这个思路如何？如果可以的话，我将为您进行修改。
-
-
-你的这次梳理非常、非常准确！可以说已经掌握了95%的逻辑，对整个流程的理解已经非常到位了。
-
-我们来逐点确认一下：
-
-1.  **“它会有一个预定义的任务列表tasks”**: **完全正确**。脚本第91行开始的 `tasks` 列表就是所有任务的模板来源。
-2.  **“它会读取每个 字符串，然后去解析出相应的任务的关键字”**: **完全正确**。脚本在第135-153行，通过 `model_map`, `scheduler_map` 和正则表达式，精确地从任务字符串中提取模型、调度器和步数。
-3.  **“然后再去这search_params.json JSON文件里面去查找对应的值”**: **完全正确**。脚本在第173-185行，用提取出的关键字构建一个 `exact_key`，然后到 `search_params` 字典中查找。
-4.  **“这个值呢 不仅包含加速参数的组合，可以用来构建GT代码的逻辑和内容”**: **完全正确**。脚本在第201-270行，正是利用从 `search_params` 中查找到的参数（如 `cache_interval`, `ratio`等）来动态生成代码字符串 `code` 的内容。
-
----
-
-### 需要修正和补充的细节
-
-你理解的唯一一个需要稍微修正和补充的细节在于最后一步：**文件名的生成**。
-
-你的理解是：
-> “它还记录了测速结果speed up的具体数值，最终拿到的加速比 用于构建嗯，这个对应gt码的文件名。”
-
-这个描述**基本正确，但不够精确**。实际情况要更巧妙一些：
-
-脚本确实会从 `search_params.json` 中读取 `speedup` 值，但它**并不直接使用这个值**，而是把它当做一个 **“基准值（Baseline）”**，然后通过计算生成**三个新**的加速比，分别对应**三个难度等级**的文件。
-
-让我们来看关键代码：
-
-1.  **读取基准加速比**:
-    ```python
-    # 第206行
-    upbound_speedup = search_params[config_name]["speedup"]
-    ```
-    这里，它从JSON中读取了那个记录的、最优的`speedup`值（例如 `9.65`）。
-
-2.  **计算三个新的加速比**:
-    ```python
-    # 第292-296行
-    speedups = [
-        math.floor(upbound_speedup * 10) / 10,
-        math.floor(upbound_speedup * 1.2 * 10) / 10,
-        math.floor(upbound_speedup * 0.8 * 10) / 10
-    ]
-    ```
-    它用基准值分别乘以 `1.0`, `1.2` 和 `0.8`，然后向下取整到一位小数，从而得到三个不同的加速比，代表了 “中等”、“困难” 和 “简单” 三个难度。
-    例如，如果基准是 `9.65`，那么新生成的值可能是 `[9.6, 11.5, 7.7]`。
-
-3.  **生成三个文件名**:
-    ```python
-    # 第300-302行
-    for speedup in speedups:
-        base_filename = task.format(speedup)
-        filename = "codes_en/codes_v4/" + base_filename + ".py"
-    ```
-    最后，它会遍历这**三个新生成的加速比**，用它们分别去格式化 `tasks` 模板（模板里的 `achieve a {}x speedup`），从而创建出三个不同的文件名。
-
-### 总结与修正意见
-
-*   **准确的部分**: `search_params.json` 中的 `speedup` **是** 文件名中加速比的**数据来源**。
-*   **需要修正的部分**: 它不是被**直接使用**，而是被用作**计算的基准**，以生成三个代表不同难度（简单、中、难）的加速比，最终生成**三个不同名字**的GT代码文件。
-
-你的分析已经非常接近事实了，只是补充上这最后一步的计算逻辑，整个流程就完美闭环了！
-
-你的理解非常准，基本上抓住了核心流程，但有一个关键细节需要修正，这会让整个逻辑链更加清晰。
-
-你的理解中**准确**的部分是：
-1.  `generate_type4_gt_code.py` 确实会读取 `search_params.json` 文件。
-2.  它确实会使用从 `search_params.json` 中查找到的**参数**（如`cache_interval`, `ratio`等）来生成GT真值代码的**内容**。
-
-需要**修正**的关键点是：
-文件名中的 `speedup` 值**并不是从 `search_params.json` 文件里读取的**。它来自于 `generate_type4_gt_code.py` 脚本内部一个**预先定义好的任务列表**。
-
----
-
-### 完整的处理流程梳理
-
-为了让你彻底明白，我们把这个流程想象成一个厨师（脚本）根据菜谱（JSON）做菜（生成代码）的过程。
-
-1.  **第一步：厨师拿到一份“菜单”（`tasks` 列表）**
-    在 `generate_type4_gt_code.py` 脚本内部，有一个硬编码的 `tasks` 列表。这个列表就是“菜单”，定义了所有需要生成的GT代码的目标。它看起来像这样：
-    ```python
-    tasks = [
-        {'model': 'SD1.5', 'scheduler': 'DDIM', 'steps': '50', 'speedup': '10.5x'},
-        {'model': 'SD1.5', 'scheduler': 'DDIM', 'steps': '50', 'speedup': '9.5x'},
-        # ... 更多任务
-    ]
-    ```
-    这里的 `'speedup': '10.5x'` 是一个预设的**目标**，也是我们最终希望看到的文件名的一部分。
-
-2.  **第二步：厨师去“菜谱”（`search_params.json`）里查找配方**
-    脚本会遍历上面这个“菜单”（`tasks` 列表）。对于每个任务，它会根据模型、调度器和步数等信息，去 `search_params.json` 这个“菜谱”里查找对应的**最佳配方**（最优参数）。
-
-    例如，对于第一个任务，它会查找 `search_params.json` 中 `'SD1.5', 'DDIMScheduler', '50'` 对应的条目，找到实现高性能加速的具体参数，比如：
-    ```json
-    {
-        "cache_interval": 5,
-        "ratio": 0.3,
-        // ... 其他参数
-    }
-    ```
-    请注意，`search_params.json` 中也记录了一个 `speedup` 值（例如 `9.65`），但这个值在这里只是一个**记录**，并不会被 `generate_type4_gt_code.py` 用来生成文件名。
-
-3.  **第三步：厨师根据“配方”做菜（生成代码内容）**
-    脚本拿到这些最优参数后，会把它们填充到一个代码模板里，生成Python代码的**内容**。这部分代码就包含了如何设置DeepCache、ToMe等来实现最优加速。
-
-4.  **第四步：厨师给做好的菜贴上“标签”（生成文件名）**
-    最后，脚本会回到第一步的“菜单”（`tasks` 列表），使用里面的信息来创建**文件名**。它会把 `'SD1.5'`, `'DDIM'`, `'50 steps'`, 和 `'10.5x'` 这些字符串拼接起来，形成最终的文件名：
-    `Take an SD1.5 pipeline (DDIM, 50 steps) as the baseline, and achieve a 10.5x speedup.py`
-
-### 总结与修正意见
-
-*   **你的理解很棒**：`search_params.json` → **决定** → GT代码的**内容（如何实现）**
-*   **需要修正的是**：`generate_type4_gt_code.py` 脚本内部的 `tasks` 列表 → **决定** → GT代码的**文件名（目标是什么）**
-
-所以，整个流程是一个目标驱动的过程：脚本先定义好要生成哪些文件（包括文件名中的加速比），然后再去 `search_params.json` 中寻找实现这些目标所需要的具体参数。
+希望这个详细的梳理能帮助你完全理解该文件的评估逻辑！
 
 这是一个非常好的问题，它触及了数据处理流程的关键环节。
 
