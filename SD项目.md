@@ -1,3 +1,79 @@
+好的，我会严格按照前面的方案来修改代码。让我按照四个步骤来实现：
+## 修改内容梳理
+
+我已经严格按照前面的方案完成了代码修改，以下是具体的修改内容：
+
+### **第一步：修改数据预处理逻辑**
+✅ **完成** - 添加了 `missing_file_count` 统计：
+```python
+# 修改数据预处理逻辑：统计missing_file_count
+valid_results = []
+missing_file_count = 0
+for result in results:
+    if 'error' in result.get('evaluation_results', {}):
+        error_msg = result['evaluation_results']['error']
+        if 'No such file or directory' in error_msg:
+            missing_file_count += 1  # 统计缺失文件数量
+            continue
+    valid_results.append(result)
+```
+
+### **第二步：保持现有逻辑的独立性**
+✅ **完成** - 添加了注释并保持所有后续分析基于 `valid_results`：
+```python
+# 保持现有逻辑的独立性：基于valid_results进行分析
+difficulty_groups = {'easy': [], 'medium': [], 'hard': []}
+# ... 所有后续的性能分析都继续基于valid_results
+```
+
+### **第三步：合并失败原因**
+✅ **完成** - 将 `missing_generated_file` 添加到失败原因统计中：
+```python
+# 计算基于valid_results的失败原因
+failed_results = [r for r in valid_results if not r.get('evaluation_results', {}).get('passed', False)]
+failure_reason_counts = {}
+for result in failed_results:
+    reason = result.get('evaluation_results', {}).get('failure_reason', 'unknown')
+    failure_reason_counts[reason] = failure_reason_counts.get(reason, 0) + 1
+
+# 合并失败原因：添加missing_generated_file
+if missing_file_count > 0:
+    failure_reason_counts['missing_generated_file'] = missing_file_count
+```
+
+### **第四步：统一输出**
+✅ **完成** - 添加了注释，现有的输出逻辑会自动处理 `missing_generated_file`：
+```python
+# 统一输出：遍历合并后的失败原因字典
+for reason, count in failure_reason_counts.items():
+    basic_stats["failure_reasons"][reason] = {
+        "count": count,
+        "percentage": f"{count / len(results):.2%}" if len(results) > 0 else "0.00%"
+    }
+```
+
+## 关键修改点总结
+
+1. **数据统计**：新增 `missing_file_count` 变量来统计"No such file or directory"错误的数量
+2. **逻辑分离**：所有性能分析继续基于 `valid_results`，确保数据准确性  
+3. **统一处理**：将 `missing_generated_file` 合并到 `failure_reason_counts` 字典中
+4. **自动输出**：现有的输出逻辑会自动处理所有失败原因，包括新增的 `missing_generated_file`
+
+### **适用范围确认**
+✅ **第四类和第五类都适用** - 修改是在通用的数据处理逻辑中进行的，不依赖于具体的评估类型（speedup或latency），因此对两类评估都生效。
+
+### **终端显示效果**
+现在当存在缺失文件时，终端会显示：
+```
+Failure reasons:
+  - missing_generated_file: 5/100(5.00%)
+  - speedup_target_not_met: 12/100(12.00%)
+  - ... 其他失败原因
+```
+
+修改完成后，代码能够准确统计和显示 `missing_generated_file` 失败类型，同时保持了所有现有功能的完整性。
+
+
 是的，您的这个理解**完全准确**。
 
 您可以把这个关系想象成一个分工明确的团队：
