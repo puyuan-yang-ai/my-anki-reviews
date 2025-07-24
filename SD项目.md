@@ -1,3 +1,181 @@
+<no message>
+Read file: 
+<no message>
+Read file: agent_benchmark_clean/evaluation/eval_utils.py
+<no message>
+我已经按照前面的修改方案对 `ModelEvaluatorClipScore` 类进行了修改。下面是对修改内容的梳理，方便你进行检查：
+
+## 修改内容梳理
+
+### 1. 在 `__init__` 方法中添加了 ControlNet 检测
+
+```python
+# 第1步：自动检测 Pipeline 类型
+self.is_img2img = "Img2Img" in self.pipe.__class__.__name__
+self.is_controlnet = "ControlNet" in self.pipe.__class__.__name__  # 新增的检测
+```
+
+### 2. 扩展了图像处理逻辑，支持 ControlNet
+
+```python
+# 第2步：为图生图 Pipeline 准备默认输入图片
+if self.is_img2img or self.is_controlnet:  # 修改条件，包含ControlNet
+    try:
+        # ... 现有的图像加载逻辑 ...
+        
+        # 如果是ControlNet，还需要生成control_image
+        if self.is_controlnet:
+            import cv2
+            import numpy as np
+            # 将默认图像转换为Canny边缘图作为control_image
+            image_array = np.array(self.default_image)
+            canny_image = cv2.Canny(image_array, 100, 200)
+            self.control_image = Image.fromarray(canny_image)
+            print(f"Generated Canny control image for ControlNet pipeline")
+```
+
+### 3. 添加了备用方案，处理图像加载失败的情况
+
+```python
+# 备用方案：创建一个简单的灰色图像
+print(f"Warning: Could not load default image ({e}), creating fallback image")
+self.default_image = Image.new('RGB', (512, 512), color=(128, 128, 128))
+
+# 如果是ControlNet，还需要生成control_image
+if self.is_controlnet:
+    import numpy as np
+    # 创建一个简单的边缘图作为control_image
+    canny_array = np.zeros((512, 512), dtype=np.uint8)
+    # 添加一些边缘以便ControlNet有东西可处理
+    canny_array[100:400, 100:400] = 255
+    self.control_image = Image.fromarray(canny_array)
+    print(f"Created fallback control image for ControlNet pipeline")
+```
+
+### 4. 在 `_run_single_inference_and_get_clip` 方法中添加了 ControlNet 参数处理
+
+```python
+# 第3步：动态调整推理函数的调用参数
+inference_kwargs = {
+    "prompt": prompt,
+    "output_type": "np",
+    "return_dict": True,
+    "num_inference_steps": 20,
+    "generator": generator
+}
+if self.is_img2img:
+    inference_kwargs["image"] = self.default_image
+if self.is_controlnet:  # 新增的ControlNet参数处理
+    inference_kwargs["image"] = self.default_image
+    inference_kwargs["control_image"] = self.control_image
+```
+
+## 修改要点总结
+
+1. **检测机制增强**：增加了对 ControlNet pipeline 的检测
+2. **参数处理完善**：为 ControlNet pipeline 提供了必要的 `image` 和 `control_image` 参数
+3. **错误处理健壮**：添加了备用方案，确保即使图像加载失败也能创建有效的输入
+4. **日志信息明确**：添加了清晰的日志信息，便于调试和追踪
+
+这些修改严格遵循了前面方案的要求，没有添加额外的功能，专注于解决 ControlNet pipeline 参数不匹配的问题。修改后的代码应该能够正确处理你提供的 `1.py` 示例中的 `StableDiffusionControlNetImg2ImgPipeline`。
+
+根据你提供的具体代码示例 `1.py`，我现在可以准确分析错误的根本原因了。
+
+## 错误根本原因分析
+
+### 问题1：Pipeline类型检测不准确
+
+在 `ModelEvaluatorClipScore` 类中，代码使用以下逻辑检测pipeline类型：
+
+```python
+self.is_img2img = "Img2Img" in self.pipe.__class__.__name__
+```
+
+你的 `1.py` 文件使用的是 `StableDiffusionControlNetImg2ImgPipeline`，这个类名**确实包含 "Img2Img"**，所以应该被正确检测为img2img类型。
+
+### 问题2：参数不匹配 - 这是真正的根本原因
+
+查看你的 `1.py` 文件中的 `inference` 函数签名：
+
+```python
+def inference(pipe, prompts: List[str], image: List[Image.Image], control_image, seed: torch.Generator, height=1024, width=1024):
+    return pipe(
+        prompt=prompts,
+        output_type='np',
+        image=image,                    # 需要这个参数
+        control_image=control_image,    # 还需要这个参数
+        generator=seed,
+        num_inference_steps=num_inference_steps,
+        height=height,
+        width=width
+    )
+```
+
+但是在 `ModelEvaluatorClipScore` 的 `_run_single_inference_and_get_clip` 方法中：
+
+```python
+inference_kwargs = {
+    "prompt": prompt,
+    "output_type": "np",
+    "return_dict": True,
+    "num_inference_steps": 20,
+    "generator": generator
+}
+if self.is_img2img:
+    inference_kwargs["image"] = self.default_image  # 只提供了image参数
+
+pipe_output = self.pipe(**inference_kwargs)  # 缺少control_image参数！
+```
+
+### 核心问题
+
+**`StableDiffusionControlNetImg2ImgPipeline` 需要两个图像参数：**
+1. `image` - 原始输入图像（用于img2img变换）
+2. `control_image` - 控制图像（用于ControlNet引导，通常是Canny边缘图）
+
+但是 `ModelEvaluatorClipScore` 只提供了 `image` 参数，**没有提供 `control_image` 参数**，导致pipeline内部某个地方接收到了 `None` 值。
+
+### 解决方案
+
+需要修改 `ModelEvaluatorClipScore` 类，使其能够：
+
+1. **检测ControlNet pipeline**
+2. **为ControlNet pipeline提供适当的control_image**
+
+建议的修改：
+
+```python
+# 在 ModelEvaluatorClipScore.__init__ 中
+self.is_img2img = "Img2Img" in self.pipe.__class__.__name__
+self.is_controlnet = "ControlNet" in self.pipe.__class__.__name__
+
+if self.is_img2img or self.is_controlnet:
+    # 加载默认图像
+    # ... 现有的图像加载逻辑 ...
+    
+    # 如果是ControlNet，还需要生成control_image
+    if self.is_controlnet:
+        import cv2
+        import numpy as np
+        # 将默认图像转换为Canny边缘图作为control_image
+        image_array = np.array(self.default_image)
+        canny_image = cv2.Canny(image_array, 100, 200)
+        self.control_image = Image.fromarray(canny_image)
+
+# 在 _run_single_inference_and_get_clip 方法中
+if self.is_img2img:
+    inference_kwargs["image"] = self.default_image
+if self.is_controlnet:
+    inference_kwargs["control_image"] = self.control_image
+```
+
+### 总结
+
+错误的根本原因是：**`StableDiffusionControlNetImg2ImgPipeline` 需要两个图像参数（`image` 和 `control_image`），但评估代码只提供了一个（`image`），导致 `control_image` 为 `None`，从而引发错误。**
+
+这是一个典型的API参数不匹配问题，需要针对不同类型的pipeline提供相应的参数组合。
+
+
 Ran tool
 Read file: agent_benchmark_clean/evaluation/eval_utils.py
 Read file: agent_benchmark_clean/evaluation/eval_utils.py
