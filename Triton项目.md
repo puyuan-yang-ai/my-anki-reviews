@@ -1,4 +1,5 @@
-好的，我们来梳理一下 `main.py` 和 `verify_generated_code.py` 这两个文件的逻辑。
+
+
 
 ### `TritonBench/main.py` 的运行逻辑
 
