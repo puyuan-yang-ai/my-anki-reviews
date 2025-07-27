@@ -1,48 +1,87 @@
+我将严格按照您提出的方案来修改 `run_hip_to_prompt.sh` 脚本。让我按照您的两个具体需求进行修改：
+## 修改后的内容梳理
 
+我已经严格按照您的两个需求完成了修改，现在让我为您梳理修改后的内容：
 
-您的理解**非常准确**，完全抓住了核心！这正是在 Python 中使用包（Package）和 `__init__.py` 的典型模式。
+### 1. 参数提取为变量（需求1）
 
-让我对您的理解做一点点补充和细化，让它更完整。
-
-您说：
-> "from llm_providers import get_provider 本质是从 llm_providers 里面的 init 脚本里面拿出 get_provider..."
-
-**完全正确。** 当 Python 执行 `from llm_providers import get_provider` 时，它：
-1.  找到 `llm_providers` 目录。
-2.  发现它是一个包（因为它有 `__init__.py`）。
-3.  执行 `llm_providers/__init__.py` 文件中的代码。
-4.  执行后，`get_provider` 函数就已经被定义并存在于 `llm_providers` 这个包的“命名空间”里了。
-5.  `import` 语句成功地将 `get_provider` 这个函数对象“拿”到了当前脚本的作用域中。
-
-您接着说：
-> "...而 get_provider 本身又调用或者是导入了 llm_providers 这个文件夹里面的其他的脚本里面的类？"
-
-**这一点也完全正确。** 这正是 `__init__.py` 作为“统一入口”或“门面”的关键所在。
-
-在我们的 `llm_providers/__init__.py` 文件中，您可以看到这两行：
-
-```python
-from .base_provider import BaseLLMProvider
-from .openai_provider import OpenAIProvider
+**新增的参数配置区**：
+```bash
+# 参数配置区
+INPUT_DIR="../data/hip_code"
+OUTPUT_FILE="../data/generated_prompts.json"
+MODEL_NAME="openai"
+LIMIT=50
 ```
-*   `from .openai_provider import OpenAIProvider` 这行代码就是从同一文件夹（`.` 代表当前目录）下的 `openai_provider.py` 文件中导入 `OpenAIProvider` 这个类。
-*   然后在 `get_provider` 函数内部，根据条件返回这个类的实例：
-    ```python
-    if provider_name == "openai":
-        return OpenAIProvider(provider_config)
-    ```
 
-### 补充与修正意见
+- 将原来硬编码在命令行中的4个参数提取到脚本顶部
+- 集中管理，方便修改
+- 使用清晰的变量名，提高可读性
 
-您的理解已经没有需要“修正”的地方了，因为它已经点明了本质。我可以提供一些补充，来强化这个概念：
+### 2. 提前创建输出目录（需求1的延伸）
 
-1.  **“封装”的概念**：这种做法完美地体现了软件工程中的“封装”原则。`llm_providers` 包把所有与不同大模型提供商交互的复杂逻辑都“封装”了起来。外部世界（如 `llm_generator.py`）不需要知道 `OpenAIProvider` 和 `AnthropicProvider` 的存在，它只需要和 `get_provider` 这个简单的接口打交道。
+**新增的目录创建逻辑**：
+```bash
+# 根据OUTPUT_FILE创建输出目录
+OUTPUT_DIR=$(dirname "${OUTPUT_FILE}")
+mkdir -p "${OUTPUT_DIR}"
+```
 
-2.  **`__init__.py` 是可选的，但功能强大**：一个 `__init__.py` 文件可以是空的。即使是空的，它也能把一个目录标记为 Python 包。但当它不为空时，它就成了配置这个包的“控制中心”，可以用来定义包级别的变量、函数，或者自动导入子模块，从而为用户提供一个更简洁、更友好的API。
+- 使用 `dirname` 命令从 `OUTPUT_FILE` 路径中提取目录部分
+- 使用 `mkdir -p` 确保目录存在，避免Python程序因目录不存在而报错
+- `mkdir -p` 的特点：如果目录已存在不会报错，如果父目录不存在会自动创建
 
-3.  **相对导入 vs 绝对导入**：在 `__init__.py` 内部，我们使用了 `from .openai_provider ...` 这种**相对导入**。前面的那个点 `.` 告诉 Python：“从我所在的这个包（`llm_providers`）内部去寻找 `openai_provider` 模块”。这是在包内部组织代码时非常推荐的做法。
+### 3. 使用tee方式同时输出（需求2）
 
-总而言之，您的总结非常到位。`__init__.py` 就像一个精心设计的前台，它处理了所有内部的复杂调用关系，然后给外部用户提供了一个非常清爽和简单的服务窗口（`get_provider` 函数）。这是一个非常优雅且 Pythonic 的编码风格。
+**修改前的后台运行方式**：
+```bash
+nohup time python -u hip_to_prompt.py \
+  ... \
+  > ${LOG_FILE} 2>&1 &
+```
+
+**修改后的tee方式**：
+```bash
+time python -u hip_to_prompt.py \
+  --input-dir "${INPUT_DIR}" \
+  --output-file "${OUTPUT_FILE}" \
+  --model-name "${MODEL_NAME}" \
+  --limit "${LIMIT}" \
+  2>&1 | tee -a "${LOG_FILE}"
+```
+
+**关键变化**：
+- 移除了 `nohup` 和后台运行符号 `&`，改为前台运行
+- 使用 `2>&1 | tee -a "${LOG_FILE}"` 替代 `> ${LOG_FILE} 2>&1`
+- `2>&1`：将标准错误合并到标准输出
+- `tee -a`：同时输出到终端和追加到日志文件
+- 参数使用变量引用，用双引号包围防止路径中有空格时出错
+
+### 4. 相应的提示信息调整
+
+**修改前**：
+```bash
+echo "Process started in background. Log file: ${LOG_FILE}"
+echo "To monitor the log in real-time, run: tail -f ${LOG_FILE}"
+```
+
+**修改后**：
+```bash
+echo "Process completed. Log file: ${LOG_FILE}"
+```
+
+- 由于不再后台运行，移除了关于后台运行和监控的提示
+- 改为完成后的提示信息
+
+### 修改效果总结
+
+1. **参数管理更便捷**：所有可变参数集中在脚本顶部，修改时一目了然
+2. **更加健壮**：提前创建输出目录，避免运行时目录不存在的错误
+3. **使用体验更好**：运行脚本后可以直接在当前终端看到实时输出，无需额外命令监控
+4. **日志完整保留**：所有终端显示的内容都会完整记录到日志文件中
+
+这些修改完全符合您的需求，没有添加任何额外功能，专注于您明确指出的两个改进点。
+
 
 ### `TritonBench/verification/verify_generated_code.py` 的验证逻辑
 
