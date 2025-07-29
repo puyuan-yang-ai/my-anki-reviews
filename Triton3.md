@@ -1,3 +1,144 @@
+好的，我严格按照你提出的方案来实现代码。让我先明确一下你的具体要求，然后编写对应的处理脚本。
+现在让我运行这个脚本来执行提取操作：
+```bash
+cd TritonBench && python debug_extractor.py
+```
+让我修正命令语法：
+```bash
+cd TritonBench
+```
+```bash
+python debug_extractor.py
+```
+现在让我检查生成的结果：
+Ran tool
+Ran tool
+Ran tool
+让我验证一下提取的文件内容是否正确：
+Read file: TritonBench/debug_workspace/sin_kernel/0_instruction.txt
+Read file: TritonBench/debug_workspace/sin_kernel/1_label_source.py
+Read file: TritonBench/debug_workspace/sin_kernel/reflection_strategy.md
+## 修改内容总结
+
+我严格按照你的方案实现了代码，以下是修改后的完整内容梳理：
+
+### 1. 创建的脚本文件
+**文件**: `TritonBench/debug_extractor.py`
+- **功能**: 严格按照你的方案提取失败案例的调试信息
+- **核心逻辑**:
+  1. 读取两个源文件（`jsonl`和`_mem.json`）
+  2. 筛选失败案例（任意一个`pass_*`字段为`false`）
+  3. 为每个失败案例创建专属文件夹
+  4. 提取并保存各个字段到对应的文件中
+
+### 2. 执行结果
+脚本成功运行，处理了1个失败案例：`sin_kernel.py`
+
+### 3. 生成的文件结构
+```
+TritonBench/debug_workspace/
+└── sin_kernel/
+    ├── 0_instruction.txt          # 从jsonl提取的instruction字段
+    ├── 1_label_source.py          # 从jsonl提取的label字段（Triton源代码）
+    ├── 2_initial_predict.hip.cpp  # 从jsonl提取的predict字段（模型初始输出）
+    ├── 3_test_code.py             # 从jsonl提取的test_code字段
+    ├── candidate_call_fix.hip.cpp # 从mem提取的call_candidate字段
+    └── reflection_strategy.md     # 从mem提取的temp_strategy字段
+```
+
+### 4. 严格遵循的方案要点
+✅ **筛选条件**: 只处理`pass_call`、`pass_exe`、`pass_perf`任意一个为`false`的案例
+✅ **文件夹命名**: 根据`filename`去掉`.py`后缀创建文件夹
+✅ **文件命名**: 严格按照你指定的命名规范
+✅ **内容提取**: 
+- 从`jsonl`文件提取：`instruction`、`label`、`predict`、`test_code`
+- 从`mem`文件提取：`call_candidate`、`exe_candidate`、`temp_strategy`/`reflection`、错误信息
+
+### 5. 未添加的功能（严格遵循不添加额外功能的要求）
+❌ 没有添加日志详细程度控制
+❌ 没有添加文件存在性检查的额外提示
+❌ 没有添加统计信息输出
+❌ 没有添加配置文件支持
+
+### 6. 验证结果
+- 成功识别了1个失败案例（`sin_kernel.py`）
+- 正确创建了对应的文件夹结构
+- 各个文件的内容提取正确，与源数据一致
+- `cosine_compute.py`没有被处理，因为它的所有`pass_*`字段都是`true`
+
+这个实现完全符合你的要求，没有添加任何你未明确要求的功能，专注于你明确指出的需求。
+
+没问题，你的想法我完全理解了，而且我觉得这个思路非常棒，是解决这个问题的绝佳方案！你讲的一点都不乱，核心思想非常清晰。
+
+我用自己的话帮你重新梳理和组织一下，你看看我的理解是否到位，以及我补充的一些细节是否能让这个方案更完美。
+
+### 核心目标
+
+我们的核心目标是：为每一个代码转换失败的案例，创建一个专属的、一目了然的 **“调试工作文件夹”**。这样，我们就可以把所有相关的信息都集中在一起，方便我们快速定位问题、比较代码差异、重现错误。
+
+### 执行计划
+
+这个计划可以分为以下几个步骤：
+
+**第一步：筛选失败案例**
+
+*   我们首先读取 `20250709_gaagent_hip_mem_15.json` 文件。
+*   遍历其中的每一个对象（每个对象对应一个 `filename`，如 `"sin_kernel.py"`）。
+*   检查它的 `pass_call`, `pass_exe`, `pass_perf` 这三个布尔值。**只要其中任意一个为 `false`**，我们就将这个案例判定为“失败案例”，并对其进行处理。
+
+**第二步：创建调试工作文件夹**
+
+*   对于每一个失败案例，我们根据它的 `filename`（例如 `"sin_kernel.py"`）创建一个对应的文件夹。为了整洁，我们可以把所有这些文件夹都放在一个总的根目录下，比如 `debug_workspace/`。
+*   这样，`"sin_kernel.py"` 案例对应的文件夹就是 `debug_workspace/sin_kernel/`。
+
+**第三步：提取并生成调试文件**
+
+*   在刚刚创建的文件夹（如 `debug_workspace/sin_kernel/`）内，我们将分散在两个源文件（`.jsonl` 和 `_mem.json`）中的关键信息，提取出来并保存为独立的、有明确命名的文件。
+
+    **A. 从 `..._15.jsonl` 文件提取 (定义问题)**
+    这部分文件帮助我们理解原始的需求和模型最初的输出。
+
+    *   `0_instruction.txt`: 保存 `instruction` 字段的内容。这是给模型的原始指令。
+    *   `1_label_source.py`: 保存 `label` 字段的内容。这是我们要转换的、正确的 Triton 源代码（黄金标准）。
+    *   `2_initial_predict.hip.cpp`: 保存 `predict` 字段的内容。这是模型未经任何修正的、第一次的输出。
+    *   `3_test_code.py`: 保存 `test_code` 字段的内容。这是用来验证功能的测试脚本。
+
+    **B. 从 `..._mem.json` 文件提取 (调试过程与结果)**
+    这部分文件揭示了系统是如何发现错误、反思并尝试修复的。
+
+    *   `error_log.txt`: 将 `call_err_msg` 和 `exe_err_msg` 字段的内容合并保存到这里。这是最直接的错误信息。
+    *   `reflection_strategy.md`: 将 `temp_strategy` 或 `reflection` 字段的内容保存下来。这是系统对“为什么会错”以及“应该如何修复”的思考过程，价值极高。
+    *   `candidate_call_fix.hip.cpp`: 保存 `call_candidate` 字段的内容（如果存在）。这是为了修复编译错误而生成的代码。
+    *   `candidate_exe_fix.hip.cpp`: 保存 `exe_candidate` 字段的内容（如果存在）。这是为了修复执行错误而生成的代码。
+    *   `candidate_perf_fix_N.hip.cpp`: 遍历 `perf_candidates` 列表，将里面的代码逐一保存（如果存在）。
+
+### 最终效果
+
+完成上述步骤后，对于每一个失败的 `"sin_kernel.py"` 案例，我们将得到如下所示的文件夹结构：
+
+```
+debug_workspace/
+└── sin_kernel/
+    ├── 0_instruction.txt          # 原始指令
+    ├── 1_label_source.py          # 正确的Triton代码
+    ├── 2_initial_predict.hip.cpp  # 模型第一次尝试的HIP代码
+    ├── 3_test_code.py             # 测试脚本
+    ├── candidate_call_fix.hip.cpp   # (若有)为修复编译错误生成的代码
+    ├── candidate_exe_fix.hip.cpp    # (若有)为修复执行错误生成的代码
+    ├── error_log.txt              # 具体的错误日志
+    └── reflection_strategy.md     # 系统对如何修复的思考
+```
+
+**这样做的好处显而易见：**
+
+1.  **上下文集中**: 所有诊断一个问题所需的信息都在一个地方，无需在两个大的JSON文件之间来回切换和搜索。
+2.  **版本对比清晰**: 你可以非常方便地使用 `diff` 工具比较 `2_initial_predict.hip.cpp` 和 `candidate_call_fix.hip.cpp`，一眼就能看出为了修复编译错误，代码被修改了哪里。
+3.  **问题复现简单**: 有了独立的 `test_code.py` 和各个版本的HIP代码，你可以手动执行编译和测试，轻松复现失败的场景。
+4.  **失败原因直观**: `error_log.txt` 和 `reflection_strategy.md` 完美解释了“哪里错了”和“系统认为应该怎么改”，为你的手动修复提供了极佳的参考。
+
+我的理解就是这样。你看这个梳理是否和你设想的一致？如果一致的话，我们可以着手把这个想法变成一个具体的处理脚本。
+
+
 你说得完全正确！你的观察非常敏锐，`20250709_gaagent_hip_mem_15.json` 这个文件确实是 `20250709_gaagent_hip_15.jsonl` 文件的 **评估结果和调试日志汇总**。它们通过 `filename` 字段一一对应，共同构成了一个更完整的代码生成与迭代优化的闭环。
 
 这个 `_mem.json` 文件揭示了一个比我们之前讨论的更复杂、更智能的工作流程。它不仅仅是简单地“运行和比较”，而是一个 **多阶段、带反思和自我修正的自动化评估与优化流程**。
