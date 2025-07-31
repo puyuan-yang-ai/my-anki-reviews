@@ -1,3 +1,98 @@
+好的，让我详细解释一下这个问题。
+Read file: TritonBench/triton_to_hip/debug_workspace/matmul_kernel/3_test_code.py
+Read file: TritonBench/triton_to_hip/debug_workspace/matmul_kernel/2_initial_predict.hip.cpp
+现在我来详细解释这个BLOCK_SIZE不匹配的问题：
+
+## BLOCK_SIZE参数不匹配问题详解
+
+### 1. **测试代码中使用的BLOCK_SIZE组合**
+
+在`3_test_code.py`中，测试代码使用了以下四种不同的BLOCK_SIZE组合：
+
+```python
+# test_case_1
+BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K = 64, 128, 64
+
+# test_case_2  
+BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K = 128, 64, 128
+
+# test_case_3
+BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K = 256, 256, 64
+
+# test_case_4
+BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K = 32, 32, 32
+```
+
+### 2. **HIP代码中支持的BLOCK_SIZE组合**
+
+但是在`2_initial_predict.hip.cpp`中，只硬编码支持了两种组合：
+
+```cpp
+if (BLOCK_SIZE_M == 64 && BLOCK_SIZE_N == 64 && BLOCK_SIZE_K == 16) {
+    // 支持 (64, 64, 16)
+    hipLaunchKernelGGL((matmul_kernel<64,64,16>), ...);
+} else if (BLOCK_SIZE_M == 32 && BLOCK_SIZE_N == 32 && BLOCK_SIZE_K == 8) {
+    // 支持 (32, 32, 8) 
+    hipLaunchKernelGGL((matmul_kernel<32,32,8>), ...);
+} else {
+    // 其他组合都会报错
+    AT_ERROR("Unsupported block size parameters; only (64,64,16) and (32,32,8) allowed.");
+}
+```
+
+### 3. **问题的具体表现**
+
+当测试代码运行时会发生以下情况：
+
+- **test_case_1**: `(64, 128, 64)` → **不匹配** → 触发`AT_ERROR`，程序崩溃
+- **test_case_2**: `(128, 64, 128)` → **不匹配** → 触发`AT_ERROR`，程序崩溃  
+- **test_case_3**: `(256, 256, 64)` → **不匹配** → 触发`AT_ERROR`，程序崩溃
+- **test_case_4**: `(32, 32, 32)` → **不匹配** → 触发`AT_ERROR`，程序崩溃
+
+**没有一个测试用例能够成功执行！**
+
+### 4. **为什么会这样设计？**
+
+HIP代码使用模板参数`template<int BLOCK_SIZE_M, int BLOCK_SIZE_N, int BLOCK_SIZE_K>`，这些参数必须在编译时确定。因此：
+
+```cpp
+// 这些是编译时模板实例化，必须预先定义
+matmul_kernel<64,64,16>  // 只有这两个组合被实例化了
+matmul_kernel<32,32,8>   
+```
+
+而Triton代码中的BLOCK_SIZE是运行时参数，可以动态传入任意值：
+
+```python
+@triton.jit
+def matmul_kernel(c_ptr, a_ptr, b_ptr, BLOCK_SIZE_M: tl.constexpr, BLOCK_SIZE_N: tl.constexpr, BLOCK_SIZE_K: tl.constexpr):
+    # BLOCK_SIZE_* 可以是任意运行时传入的值
+```
+
+### 5. **解决方案**
+
+有两种解决方案：
+
+**方案A：修改HIP代码支持更多组合**
+```cpp
+if (BLOCK_SIZE_M == 64 && BLOCK_SIZE_N == 128 && BLOCK_SIZE_K == 64) {
+    hipLaunchKernelGGL((matmul_kernel<64,128,64>), ...);
+} else if (BLOCK_SIZE_M == 128 && BLOCK_SIZE_N == 64 && BLOCK_SIZE_K == 128) {
+    hipLaunchKernelGGL((matmul_kernel<128,64,128>), ...);
+} 
+// ... 添加更多组合
+```
+
+**方案B：修改测试代码使用支持的组合**
+```python
+# 只使用HIP代码支持的组合
+BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K = 64, 64, 16  # 支持
+BLOCK_SIZE_M, BLOCK_SIZE_N, BLOCK_SIZE_K = 32, 32, 8   # 支持
+```
+
+这就是为什么你的代码"可以编译，但是执行的时候没有达到预期"的原因之一 - 测试用例根本无法运行到矩阵计算的部分，就已经在参数检查阶段崩溃了。
+
+
 我来帮你分析这个问题。首先让我查看一下相关的文件，了解完整的上下文。
 Read file: TritonBench/triton_to_hip/debug_workspace/matmul_kernel/0_instruction.txt
 Read file: TritonBench/triton_to_hip/debug_workspace/matmul_kernel/1_label_source.py
