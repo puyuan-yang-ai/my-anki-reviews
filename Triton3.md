@@ -1,3 +1,80 @@
+是的，你理解得完全正确！
+
+## PyBind11关键字参数匹配规则
+
+**`pybind11::arg("xxx")` 中的 `"xxx"` 必须与测试代码中的关键字参数名完全一致。**
+
+### **具体例子分析：**
+
+**HIP代码的PyBind11绑定：**
+```cpp
+m.def("fast_cross_entropy_loss", &fast_cross_entropy_loss,
+    pybind11::arg("logits"), 
+    pybind11::arg("labels"),
+    pybind11::arg("softcap")=0.0f,           // ← 这里定义的参数名是 "softcap"
+    pybind11::arg("logit_scale")=1.0f,       // ← 这里定义的参数名是 "logit_scale"
+    ...
+);
+```
+
+**测试代码的调用：**
+```python
+# Test case 2
+loss = fast_cross_entropy_loss(logits, labels, logit_softcapping=logit_softcapping)
+#                                              ^^^^^^^^^^^^^^^^
+#                                              测试代码使用的参数名是 "logit_softcapping"
+```
+
+### **结果：参数名不匹配！**
+
+- **PyBind11期望**：`softcap=xxx`
+- **测试代码传入**：`logit_softcapping=xxx`
+- **错误**：`TypeError: got an unexpected keyword argument 'logit_softcapping'`
+
+## 验证这个理解
+
+让我们看看测试代码中所有的关键字参数调用：
+
+```python
+# 第20行：测试代码使用 logit_softcapping
+loss = fast_cross_entropy_loss(logits, labels, logit_softcapping=logit_softcapping)
+
+# 第30行：测试代码使用 logit_scaling  
+loss = fast_cross_entropy_loss(logits, labels, logit_scaling=logit_scaling)
+
+# 第39行：测试代码使用两个参数名
+loss = fast_cross_entropy_loss(logits, labels, 
+                               logit_softcapping=logit_softcapping, 
+                               logit_scaling=logit_scaling)
+```
+
+**所以PyBind11绑定应该是：**
+```cpp
+m.def("fast_cross_entropy_loss", &fast_cross_entropy_loss,
+    pybind11::arg("logits"), 
+    pybind11::arg("labels"),
+    pybind11::arg("logit_softcapping")=0.0f,    // ✅ 匹配测试代码
+    pybind11::arg("logit_scaling")=1.0f,        // ✅ 匹配测试代码
+    ...
+);
+```
+
+## 重要说明
+
+**这个匹配要求只适用于关键字参数！**
+
+- ✅ **位置参数**：`fast_cross_entropy_loss(logits, labels, 0.5, 1.5)` - 名称无关
+- ❌ **关键字参数**：`fast_cross_entropy_loss(logits, labels, logit_softcapping=0.5)` - 名称必须匹配
+
+## 总结
+
+你的理解完全正确：
+- `pybind11::arg("xxx")` 中的 `"xxx"` 定义了Python中可以使用的关键字参数名
+- 测试代码中使用的关键字参数名必须与 `pybind11::arg("xxx")` 中的 `"xxx"` 完全一致
+- 这是PyBind11的关键字参数解析机制的要求
+
+这确实是导致测试失败的一个重要原因！
+
 你说得很对！我需要澄清和修正我的分析。在**位置参数传递**的情况下，形参和实参的名称确实可以不一样，这不会影响参数传递。
 
 让我重新分析这个问题：
