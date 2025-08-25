@@ -1,3 +1,197 @@
+看来问题不仅仅是 `fuse_qkv_projections()` 导致的。让我进一步分析可能的原因。
+Search files...
+Ran tool
+Ran tool
+Search files...
+现在我明白问题所在了。FlashAttention可能是在以下几个层面被默认启用的：
+
+1. **diffusers库默认启用**：新版本的diffusers可能默认使用FlashAttention
+2. **PyTorch编译优化**：可能在PyTorch层面启用了FlashAttention
+3. **模型权重本身包含FlashAttention配置**
+
+让我检查具体的解决方案：
+Ran tool
+现在我找到了根本原因和解决方案。问题在于diffusers库可能默认启用了FlashAttention，而在ROCm环境下存在头维度限制。以下是几个解决方案：
+
+## 解决方案
+
+### 方案1：显式禁用FlashAttention（推荐）
+
+修改 `192_experiment.py` 文件，在pipeline创建后显式设置注意力处理器：
+
+```python
+import torch
+from diffusers import StableDiffusionPipeline, DDIMScheduler
+from diffusers.models.attention_processor import AttnProcessor
+model_id="runwayml/stable-diffusion-v1-5"
+scheduler = DDIMScheduler.from_pretrained(model_id, subfolder='scheduler')
+pipe = StableDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16).to('cuda')
+
+# 显式禁用FlashAttention，使用标准注意力处理器
+pipe.unet.set_attn_processor(AttnProcessor())
+
+from DeepCache import DeepCacheSDHelper
+helper = DeepCacheSDHelper(pipe=pipe)
+helper.set_params(cache_interval=5, cache_branch_id=0)
+helper.enable()
+import tomesd
+tomesd.apply_patch(pipe, ratio=0.6, max_downsample=1)
+pipe("A prompt", num_inference_steps=20)
+```
+
+### 方案2：使用环境变量禁用
+
+修改 `run_puyuan.sh` 脚本：
+
+```bash
+#!/bin/bash
+
+# 禁用FlashAttention相关环境变量
+export DISABLE_FLASH_ATTN=1
+export USE_FLASH_ATTN=0
+export PYTORCH_DISABLE_FLASH_ATTENTION=1
+
+python puyuan_test.py \
+--gen-file 192_experiment.py \
+--baseline-file 192_baseline.py \
+--gt-file 192.py \
+--batch-size 5 \
+--num-samples 64
+```
+
+### 方案3：使用Xformers替代
+
+如果安装了xformers，可以强制使用xformers的内存高效注意力：
+
+```python
+import torch
+from diffusers import StableDiffusionPipeline, DDIMScheduler
+model_id="runwayml/stable-diffusion-v1-5"
+scheduler = DDIMScheduler.from_pretrained(model_id, subfolder='scheduler')
+pipe = StableDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16).to('cuda')
+
+# 启用xformers内存高效注意力（替代FlashAttention）
+try:
+    pipe.enable_xformers_memory_efficient_attention()
+    print("使用xformers内存高效注意力")
+except:
+    print("xformers不可用，使用标准注意力")
+
+from DeepCache import DeepCacheSDHelper
+helper = DeepCacheSDHelper(pipe=pipe)
+helper.set_params(cache_interval=5, cache_branch_id=0)
+helper.enable()
+import tomesd
+tomesd.apply_patch(pipe, ratio=0.6, max_downsample=1)
+pipe("A prompt", num_inference_steps=20)
+```
+
+### 方案4：降级到float32
+
+如果以上方案都不行，可以尝试使用float32精度：
+
+```python
+import torch
+from diffusers import StableDiffusionPipeline, DDIMScheduler
+model_id="runwayml/stable-diffusion-v1-5"
+scheduler = DDIMScheduler.from_pretrained(model_id, subfolder='scheduler')
+pipe = StableDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float32).to('cuda')
+
+from DeepCache import DeepCacheSDHelper
+helper = DeepCacheSDHelper(pipe=pipe)
+helper.set_params(cache_interval=5, cache_branch_id=0)
+helper.enable()
+import tomesd
+tomesd.apply_patch(pipe, ratio=0.6, max_downsample=1)
+pipe("A prompt", num_inference_steps=20)
+```
+
+## 推荐的排查顺序
+
+1. **首先尝试方案1**：显式设置 `AttnProcessor()` 来禁用FlashAttention
+2. **如果还有问题，结合方案2**：同时使用环境变量
+3. **检查依赖版本**：确认diffusers、torch、flash-attn的版本兼容性
+4. **最后考虑方案4**：如果内存足够，使用float32精度
+
+建议先尝试方案1，这是最直接有效的解决方法。如果问题仍然存在，请告诉我具体的错误信息，我们可以进一步排查。
+
+这个错误表明你遇到了FlashAttention在ROCm环境下的限制问题。让我先分析一下相关的代码文件来了解具体情况。
+Read file: agent_benchmark_clean/test/test_jiajun_speedup/puyuan_test.py
+Read file: agent_benchmark_clean/test/test_jiajun_speedup/model_evaluator.py
+Read file: agent_benchmark_clean/test/test_jiajun_speedup/192_experiment.py
+Ran tool
+Ran tool
+根据你遇到的错误和项目代码分析，这个问题是由于在ROCm环境下运行使用了FlashAttention优化的扩散模型时，遇到了头维度（head dimension）限制导致的。
+
+## 问题分析
+
+**错误原因：**
+1. **环境差异**：NVIDIA GPU环境下FlashAttention支持的头维度最大为256，但在AMD ROCm环境下限制更严格，特别是反向传播时头维度仅支持最大128
+2. **模型优化冲突**：你的代码中使用了 `pipe.fuse_qkv_projections()` 优化，这个方法会融合QKV投影层，可能导致头维度超过ROCm环境下FlashAttention的限制
+
+## 排查步骤
+
+### 1. 检查模型配置
+首先确认模型的注意力头维度设置：
+Ran tool
+### 2. 检查具体的模型实现
+Read file: agent_benchmark_clean/test/test_jiajun_speedup/192_baseline.py
+## 解决方案
+
+基于分析，问题的核心是 `pipe.fuse_qkv_projections()` 方法在ROCm环境下与FlashAttention的兼容性问题。以下是几种解决方案：
+
+### 方案1：禁用QKV融合（推荐）
+修改 `192_experiment.py` 文件，注释掉或移除 `fuse_qkv_projections()` 调用：
+
+```python
+import torch
+from diffusers import StableDiffusionPipeline, DDIMScheduler
+model_id="runwayml/stable-diffusion-v1-5"
+scheduler = DDIMScheduler.from_pretrained(model_id, subfolder='scheduler')
+pipe = StableDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float16).to('cuda')
+# pipe.fuse_qkv_projections()  # 注释掉这行
+from DeepCache import DeepCacheSDHelper
+helper = DeepCacheSDHelper(pipe=pipe)
+helper.set_params(cache_interval=5, cache_branch_id=0)
+helper.enable()
+import tomesd
+tomesd.apply_patch(pipe, ratio=0.6, max_downsample=1)
+pipe("A prompt", num_inference_steps=20)
+```
+
+### 方案2：禁用FlashAttention
+如果需要保留QKV融合，可以通过环境变量禁用FlashAttention：
+
+```bash
+#!/bin/bash
+
+export USE_FLASH_ATTN=0
+export DISABLE_FLASH_ATTN=1
+
+python puyuan_test.py \
+--gen-file 192_experiment.py \
+--baseline-file 192_baseline.py \
+--gt-file 192.py \
+--batch-size 5 \
+--num-samples 64
+```
+
+### 方案3：调整数据类型
+将模型从 `torch.float16` 改为 `torch.float32`，这可能会避免某些精度相关的限制：
+
+```python
+pipe = StableDiffusionPipeline.from_pretrained(model_id, scheduler=scheduler, torch_dtype=torch.float32).to('cuda')
+```
+
+## 排查建议
+
+1. **优先尝试方案1**：注释掉 `fuse_qkv_projections()` 调用，这是最直接的解决方法
+2. **检查ROCm版本**：确认你使用的ROCm版本是否支持更新的FlashAttention特性
+3. **监控内存使用**：禁用优化后注意观察GPU内存使用情况，可能需要调整batch_size
+4. **性能对比**：记录修改前后的性能差异，评估优化效果
+
+这个问题主要是由于NVIDIA CUDA和AMD ROCm环境下FlashAttention实现差异导致的，通过移除或调整相关优化通常能够解决。
+
 这是一个非常重要的问题，它关系到对 Docker 核心工作模型的理解。
 
 您的这个 `remove_docker.sh` 脚本，应该**永远**在**宿主机的终端 (host machine's terminal)** 里运行。
