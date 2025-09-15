@@ -1,3 +1,484 @@
+你问得非常好！从主流最佳实践的角度来看，我推荐一个更现代化的解决方案。
+
+## 🎯 主流最佳实践方案：状态机 + Context
+
+### 为什么这是主流做法？
+
+1. **React 社区主流趋势**：使用 Context + useReducer 管理复杂交互状态
+2. **状态机模式**：前端领域处理复杂交互的标准做法（XState 等库的核心思想）
+3. **可预测性**：状态转换明确，易于测试和调试
+4. **可扩展性**：未来添加新功能时不会破坏现有逻辑
+
+## 🔧 主流实现方案
+
+### 方案：TodoItem 交互状态机
+
+#### 核心思路
+每个 TodoItem 都有明确的交互状态，状态转换有严格规则。
+
+```tsx
+// 定义交互状态
+type TodoItemState = 
+  | 'idle'           // 空闲状态
+  | 'editing'        // 编辑状态  
+  | 'dragging'       // 拖拽状态
+  | 'swiping'        // 滑动删除状态
+
+// 状态转换规则
+const stateTransitions = {
+  idle: ['editing', 'dragging', 'swiping'],
+  editing: ['idle'],
+  dragging: ['idle'],  
+  swiping: ['idle']
+};
+```
+
+#### 实现架构
+
+**1. 创建 TodoItem 状态管理 Hook**
+```tsx
+// hooks/useTodoItemState.ts
+const useTodoItemState = (todoId: string) => {
+  const [state, setState] = useState<TodoItemState>('idle');
+  
+  const canTransitionTo = (newState: TodoItemState) => {
+    return stateTransitions[state].includes(newState);
+  };
+  
+  const transitionTo = (newState: TodoItemState) => {
+    if (canTransitionTo(newState)) {
+      setState(newState);
+      return true;
+    }
+    return false;
+  };
+  
+  return {
+    state,
+    transitionTo,
+    isIdle: state === 'idle',
+    isEditing: state === 'editing',
+    isDragging: state === 'dragging',
+    isSwiping: state === 'swiping'
+  };
+};
+```
+
+**2. 创建 TodoList 协调 Context**
+```tsx
+// contexts/TodoListContext.tsx
+interface TodoListContextType {
+  getItemState: (id: string) => TodoItemState;
+  setItemState: (id: string, state: TodoItemState) => void;
+  hasAnyItemInState: (state: TodoItemState) => boolean;
+}
+
+const TodoListContext = createContext<TodoListContextType | null>(null);
+
+export const TodoListProvider: React.FC<{children: React.ReactNode}> = ({children}) => {
+  const [itemStates, setItemStates] = useState<Map<string, TodoItemState>>(new Map());
+  
+  const getItemState = (id: string) => itemStates.get(id) || 'idle';
+  
+  const setItemState = (id: string, state: TodoItemState) => {
+    setItemStates(prev => new Map(prev).set(id, state));
+  };
+  
+  const hasAnyItemInState = (state: TodoItemState) => {
+    return Array.from(itemStates.values()).includes(state);
+  };
+  
+  return (
+    <TodoListContext.Provider value={{getItemState, setItemState, hasAnyItemInState}}>
+      {children}
+    </TodoListContext.Provider>
+  );
+};
+```
+
+**3. TodoItem 使用状态机**
+```tsx
+// TodoItem.tsx
+const TodoItem: React.FC<TodoItemProps> = ({todo, ...props}) => {
+  const {getItemState, setItemState} = useContext(TodoListContext);
+  const itemState = getItemState(todo.id);
+  
+  const handleEdit = () => {
+    if (itemState === 'idle') {
+      setItemState(todo.id, 'editing');
+      setIsEditing(true);
+    }
+  };
+  
+  const handleSave = () => {
+    // 保存逻辑...
+    setItemState(todo.id, 'idle');
+    setIsEditing(false);
+  };
+  
+  const handleDragStart = () => {
+    if (itemState === 'idle') {
+      setItemState(todo.id, 'dragging');
+    }
+  };
+  
+  // 渲染时根据状态决定行为
+  const canDrag = itemState === 'idle' && !todo.completed;
+  const canEdit = itemState === 'idle';
+  const canSwipe = itemState === 'idle';
+  
+  return (
+    <div draggable={canDrag}>
+      {/* 组件内容 */}
+    </div>
+  );
+};
+```
+
+**4. TodoList 协调全局行为**
+```tsx
+// TodoList.tsx
+const TodoList: React.FC<TodoListProps> = (props) => {
+  const {hasAnyItemInState} = useContext(TodoListContext);
+  
+  // 全局行为判断
+  const canStartNewDrag = !hasAnyItemInState('editing') && !hasAnyItemInState('dragging');
+  
+  return (
+    <TodoListProvider>
+      <div>
+        {todos.map(todo => (
+          <TodoItem key={todo.id} todo={todo} {...props} />
+        ))}
+      </div>
+    </TodoListProvider>
+  );
+};
+```
+
+## 🌟 为什么这是主流最佳实践？
+
+### 1. **符合 React 生态主流**
+- **Context Pattern**：React 官方推荐的跨组件状态管理
+- **Custom Hooks**：现代 React 的标准抽象方式
+- **State Machine**：复杂交互的行业标准解决方案
+
+### 2. **可预测性和可调试性**
+```tsx
+// 状态转换一目了然
+console.log(`TodoItem ${id}: ${oldState} -> ${newState}`);
+
+// 可以轻松添加状态转换日志
+const transitionTo = (newState: TodoItemState) => {
+  if (canTransitionTo(newState)) {
+    console.log(`State transition: ${state} -> ${newState}`);
+    setState(newState);
+  } else {
+    console.warn(`Invalid transition: ${state} -> ${newState}`);
+  }
+};
+```
+
+### 3. **测试友好**
+```tsx
+// 状态机逻辑可以独立测试
+describe('TodoItem State Machine', () => {
+  test('should transition from idle to editing', () => {
+    const {result} = renderHook(() => useTodoItemState('test-id'));
+    act(() => {
+      result.current.transitionTo('editing');
+    });
+    expect(result.current.state).toBe('editing');
+  });
+});
+```
+
+### 4. **扩展性强**
+```tsx
+// 添加新状态很简单
+type TodoItemState = 
+  | 'idle'
+  | 'editing'
+  | 'dragging'
+  | 'swiping'
+  | 'deleting'    // 新增
+  | 'duplicating' // 新增
+
+// 状态转换规则也容易扩展
+const stateTransitions = {
+  idle: ['editing', 'dragging', 'swiping', 'deleting', 'duplicating'],
+  editing: ['idle', 'deleting'], // 编辑时也可以删除
+  // ...
+};
+```
+
+### 5. **性能优化友好**
+```tsx
+// 可以轻松添加性能优化
+const TodoItem = React.memo(({todo}) => {
+  const itemState = useContext(TodoListContext).getItemState(todo.id);
+  
+  // 只有状态变化时才重新渲染
+  return useMemo(() => {
+    return <div>{/* 组件内容 */}</div>;
+  }, [itemState, todo]);
+});
+```
+
+## 🎯 与其他方案对比
+
+### 我之前提到的方案问题：
+1. **方案一（通知机制）**：还是基于回调，容易形成回调地狱
+2. **方案二（焦点优化）**：只是局部优化，没有解决根本架构问题  
+3. **方案三（交互模式）**：概念正确但实现不够标准化
+4. **方案四（状态清理）**：补丁式修复，不是系统性解决方案
+
+### 状态机方案的优势：
+1. **架构清晰**：每个状态和转换都有明确定义
+2. **易于理解**：新开发者可以快速理解交互逻辑
+3. **便于维护**：修改某个状态不会影响其他状态
+4. **行业标准**：大型项目的通用做法
+
+## 🚀 实施建议
+
+### 渐进式迁移
+1. **第一步**：实现状态机 Hook 和 Context
+2. **第二步**：迁移编辑状态管理
+3. **第三步**：迁移拖拽状态管理
+4. **第四步**：迁移滑动删除状态管理
+
+### 长远收益
+1. **降低 Bug 率**：状态转换规则明确，减少意外状态
+2. **提升开发效率**：新功能开发时有清晰的状态模型
+3. **便于团队协作**：状态机是通用概念，团队成员容易理解
+4. **支持复杂功能**：未来添加批量操作、多选等功能时架构已就绪
+
+**这个方案虽然前期投入稍大，但是符合现代前端开发的主流最佳实践，能够显著降低未来的技术债务和开发风险。**
+
+非常好！基于问题分析，让我梳理一个全面的修改思路和实现方案。
+
+## 🎯 整体修改思路
+
+### 核心原则
+**在保持组件独立性的同时，建立轻量级的协调机制，确保编辑、拖拽、删除三种交互模式和谐共存。**
+
+## 🔧 实现方案
+
+### 方案一：轻量级编辑状态通知（推荐）
+
+#### 核心思路
+不恢复全局编辑状态，而是让 TodoItem 在编辑时通知父组件，父组件据此调整拖拽行为。
+
+#### 实现要点
+
+**1. TodoItem 添加编辑状态回调**
+```tsx
+// TodoItemProps 添加
+onEditingChange?: (id: string, isEditing: boolean) => void;
+
+// 在 setIsEditing 时调用
+setIsEditing(true);
+onEditingChange?.(todo.id, true);
+```
+
+**2. TodoList 维护编辑项集合**
+```tsx
+// 不是全局状态，而是编辑项的ID集合
+const [editingItemIds, setEditingItemIds] = useState<Set<string>>(new Set());
+
+// 判断某项是否在编辑
+const isItemEditing = (id: string) => editingItemIds.has(id);
+```
+
+**3. 拖拽时检查编辑状态**
+```tsx
+// 在外层 div 的 draggable 属性
+draggable={!isNewInput && !todo.completed && !isItemEditing(todo.id)}
+```
+
+**优势：**
+- 最小化改动，不影响组件独立性
+- 只是通知机制，不是状态控制
+- 解决了拖拽与编辑的冲突
+
+### 方案二：焦点管理优化
+
+#### 核心思路
+简化焦点逻辑，避免多重 useEffect 竞争。
+
+#### 实现要点
+
+**1. 合并焦点相关的 useEffect**
+```tsx
+// 将两个焦点相关的 useEffect 合并为一个
+useEffect(() => {
+  if (isEditing && inputRef.current) {
+    // 使用 requestAnimationFrame 确保 DOM 更新后再设置焦点
+    requestAnimationFrame(() => {
+      inputRef.current?.focus();
+      // 移除 select()，避免某些设备上的问题
+    });
+  }
+}, [isEditing]);
+```
+
+**2. 移除 select() 调用**
+- `select()` 在某些移动设备上可能导致输入问题
+- 用户点击时自然会定位光标位置
+
+**3. 优化 shouldFocus 逻辑**
+```tsx
+// 避免重复设置 isEditing
+if (shouldFocus && !isNewItem && !isEditing) {
+  setIsEditing(true);
+  // 其他逻辑...
+}
+```
+
+### 方案三：交互模式管理
+
+#### 核心思路
+建立清晰的交互模式优先级和切换规则。
+
+#### 实现要点
+
+**1. 定义交互模式优先级**
+```
+编辑模式 > 拖拽模式 > 滑动删除模式
+```
+
+**2. 模式互斥规则**
+- 编辑时：禁用拖拽和滑动删除
+- 拖拽时：自动退出编辑模式
+- 滑动删除时：不影响其他模式
+
+**3. 实现模式切换**
+```tsx
+// TodoItem 内部
+const canDrag = !isEditing && !isNewItem && !todo.completed;
+const canSwipe = !isEditing && !isNewItem;
+
+// TodoList 层面
+const handleDragStart = (e, index) => {
+  // 如果该项正在编辑，阻止拖拽
+  if (isItemEditing(todo.id)) {
+    e.preventDefault();
+    return;
+  }
+  // 正常拖拽逻辑
+};
+```
+
+### 方案四：状态清理和边界处理
+
+#### 核心思路
+确保状态转换的完整性，避免中间状态。
+
+#### 实现要点
+
+**1. handleSave 优化**
+```tsx
+const handleSave = () => {
+  const trimmedText = text.trim();
+  
+  // 统一的退出编辑逻辑
+  const exitEdit = () => {
+    setIsEditing(false);
+    onEditingChange?.(todo.id, false);
+  };
+  
+  // 各种情况的处理...
+  // 最后统一调用 exitEdit()
+};
+```
+
+**2. onBlur 增强**
+```tsx
+onBlur={(e) => {
+  // 检查焦点是否真的离开了组件
+  // 避免组件内部元素切换导致的 blur
+  if (!containerRef.current?.contains(e.relatedTarget)) {
+    handleSave();
+  }
+}}
+```
+
+**3. 组件卸载清理**
+```tsx
+useEffect(() => {
+  return () => {
+    // 组件卸载时通知父组件
+    if (isEditing) {
+      onEditingChange?.(todo.id, false);
+    }
+  };
+}, []);
+```
+
+## 🚀 推荐的实施策略
+
+### 分阶段实施
+
+#### 第一阶段：修复拖拽问题
+1. 实现轻量级编辑状态通知（方案一）
+2. 让拖拽功能感知编辑状态
+3. 测试拖拽功能恢复
+
+#### 第二阶段：修复输入问题
+1. 优化焦点管理（方案二）
+2. 移除可能导致问题的 select()
+3. 测试输入功能正常
+
+#### 第三阶段：完善交互
+1. 实现交互模式管理（方案三）
+2. 添加状态清理逻辑（方案四）
+3. 全面测试各种交互场景
+
+### 最小化改动原则
+
+**核心改动点：**
+1. TodoItem：添加 `onEditingChange` 回调
+2. TodoList：维护 `editingItemIds` 集合
+3. 拖拽条件：检查编辑状态
+4. 焦点逻辑：简化和优化
+
+**保持不变的：**
+- 不恢复全局编辑状态
+- 每个 TodoItem 仍独立管理自己的编辑
+- 保持组件的低耦合
+
+## 🎯 预期效果
+
+### 问题解决
+1. ✅ 拖拽功能正常：编辑时不可拖拽，非编辑时可拖拽
+2. ✅ 输入功能正常：焦点管理清晰，无竞争
+3. ✅ 交互流畅：各种模式切换自然
+
+### 用户体验提升
+1. 编辑时视觉上禁用拖拽图标
+2. 交互模式切换有明确的反馈
+3. 不会出现卡死或异常状态
+
+### 代码质量改善
+1. 逻辑更清晰，易于理解
+2. 状态管理更可靠
+3. 便于后续功能扩展
+
+## 🔍 关键实现细节
+
+### 避免的陷阱
+1. **不要**恢复全局编辑状态
+2. **不要**在多个地方重复设置焦点
+3. **不要**忽略组件卸载时的清理
+
+### 必须处理的边界情况
+1. 快速切换编辑项
+2. 编辑时切换页面
+3. 空文本的处理
+4. 移动端和桌面端的差异
+
+这个方案既解决了当前的问题，又保持了我们删除全局状态带来的好处。关键是用轻量级的通知机制替代了重量级的状态管理。
+
 很好！让我为你提供一个全面的测试计划来验证修改是否成功。
 
 ## 🧪 测试验证计划
