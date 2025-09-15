@@ -1,3 +1,206 @@
+好的，我将严格按照方案二来修改代码，将输入框改为自适应高度的 textarea。
+
+## 开始修改
+
+### 1. 修改 TodoItem 组件 - 添加高度调整函数
+
+[1 tool called]
+
+首先，我需要导入 useCallback：
+
+[1 tool called]
+
+### 2. 修改 inputRef 的类型定义
+
+[1 tool called]
+
+### 3. 添加高度调整函数
+
+[1 tool called]
+
+### 4. 查找并替换 input 元素为 textarea
+
+[2 tools called]
+
+### 5. 修改 handleKeyDown 函数以防止回车键在 textarea 中换行
+
+[1 tool called]
+
+handleKeyDown 函数已经有 `e.preventDefault()` 来防止回车键的默认行为，所以不需要修改。
+
+### 6. 检查是否有编译错误
+
+[1 tool called]
+
+完美！没有编译错误。
+
+## 修改内容梳理
+
+我已经严格按照方案二完成了修改，以下是详细的修改内容：
+
+### 1. **导入 useCallback**
+- 在第1行添加了 `useCallback` 的导入
+- 用于创建高度调整函数，避免重复创建
+
+### 2. **修改 ref 类型**
+- 将 `inputRef` 的类型从 `HTMLInputElement` 改为 `HTMLTextAreaElement`
+- 适配新的 textarea 元素
+
+### 3. **添加高度调整函数**
+```typescript
+const adjustTextareaHeight = useCallback(() => {
+  if (inputRef.current) {
+    // 先重置高度为 auto 以获取准确的 scrollHeight
+    inputRef.current.style.height = 'auto';
+    // 设置高度为内容高度
+    inputRef.current.style.height = `${inputRef.current.scrollHeight}px`;
+  }
+}, []);
+```
+- 使用 `useCallback` 创建，避免依赖变化导致的重复创建
+- 先设置高度为 'auto' 获取准确的 scrollHeight
+- 然后设置为实际内容高度
+
+### 4. **添加高度自动调整逻辑**
+- 在原有的 `useEffect` 中，当进入编辑状态时调用 `adjustTextareaHeight()`
+- 新增一个 `useEffect` 监听 `text` 变化，自动调整高度
+
+### 5. **替换 input 为 textarea**
+将：
+```jsx
+<input
+  ref={inputRef}
+  type="text"
+  value={text}
+  onChange={(e) => setText(e.target.value)}
+  ...
+  className="w-full px-2 py-1 text-gray-700 bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none"
+/>
+```
+
+改为：
+```jsx
+<textarea
+  ref={inputRef}
+  value={text}
+  onChange={(e) => {
+    setText(e.target.value);
+    adjustTextareaHeight();
+  }}
+  ...
+  className="w-full px-2 py-1 text-gray-700 bg-transparent border-b border-gray-300 focus:border-blue-500 focus:outline-none resize-none overflow-hidden"
+  rows={1}
+/>
+```
+
+### 6. **关键变化点**
+- `onChange` 事件中添加了 `adjustTextareaHeight()` 调用，实现实时高度调整
+- 添加了 `resize-none` 类，禁用用户手动调整大小
+- 添加了 `overflow-hidden` 类，隐藏滚动条
+- 设置 `rows={1}` 作为初始高度
+
+### 7. **保持不变的功能**
+- 回车键仍然保存内容（已有 `e.preventDefault()` 阻止换行）
+- 失焦自动保存
+- Escape 键取消编辑
+- 所有其他交互逻辑保持不变
+
+这个修改实现了：
+- 输入框自动根据内容调整高度
+- 文本超过一行时自动换行显示
+- 用户可以看到所有输入的内容
+- 保持了原有的所有功能和交互逻辑
+
+  
+
+非常感谢您的澄清！现在我完全理解了需求。让我梳理一下修改的整体思路和实现方案：
+
+## 需求澄清
+- **不是真正的多行输入**：用户不会手动按回车换行，所有内容都是连续的文本
+- **自动换行显示**：当文本长度超过容器宽度时，自动换行显示
+- **自适应高度**：textarea 高度根据内容自动调整
+- **保持回车键行为**：回车键仍然表示保存当前项并创建新项
+- **无高度限制**：不限制最大行数或高度
+
+## 整体修改思路
+
+### 1. **替换输入元素**
+- 将 `<input type="text">` 替换为 `<textarea>`
+- 保持所有现有的事件处理逻辑（onBlur、onKeyDown、onChange等）
+
+### 2. **自适应高度实现**
+- 使用 `textarea` 的 `scrollHeight` 属性来动态计算所需高度
+- 在内容变化时自动调整 textarea 的高度
+- 设置合理的最小高度（如单行高度）
+
+### 3. **样式调整**
+- 移除 textarea 的默认样式（如 resize、滚动条）
+- 保持与原 input 相似的外观
+- 确保换行时的视觉效果良好
+
+### 4. **事件处理保持不变**
+- 回车键：仍然触发保存操作
+- 失焦：仍然自动保存
+- Escape键：仍然取消编辑
+
+## 可行的实现方案
+
+### 方案一：使用 useEffect 监听内容变化
+```
+1. 创建一个 useEffect 监听 text 状态变化
+2. 当 text 变化时，计算 textarea 所需的高度
+3. 动态设置 textarea 的 style.height
+```
+
+### 方案二：使用 useCallback 创建调整高度的函数
+```
+1. 创建 adjustTextareaHeight 函数
+2. 在 onChange 事件中调用此函数
+3. 在组件挂载时也调用一次以设置初始高度
+```
+
+### 方案三：使用 ref 直接操作 DOM
+```
+1. 使用现有的 inputRef
+2. 在需要时直接操作 textarea.style.height
+3. 通过 scrollHeight 计算准确高度
+```
+
+## 技术实现要点
+
+### 1. **高度计算逻辑**
+```
+1. 设置 height 为 'auto' 或最小高度
+2. 获取 scrollHeight
+3. 将 height 设置为 scrollHeight + 边距
+```
+
+### 2. **性能优化**
+- 避免频繁的高度重计算
+- 使用 requestAnimationFrame 进行平滑调整
+
+### 3. **边界情况处理**
+- 内容清空时回到最小高度
+- 处理中文输入法的兼容性
+- 确保在不同设备上的一致性
+
+## 推荐方案
+
+我推荐使用**方案二（useCallback + useEffect 组合）**：
+
+1. **useCallback** 创建高度调整函数，避免重复创建
+2. **useEffect** 监听文本变化，自动调整高度
+3. **在 onChange 中调用**高度调整函数，实现实时响应
+4. **保持所有现有逻辑**不变，只替换输入元素和添加高度调整
+
+这个方案的优点：
+- 代码清晰易懂
+- 性能良好
+- 易于维护
+- 与现有代码集成度高
+
+您觉得这个思路和方案如何？有什么需要调整或补充的吗？
+
 我理解您的需求是关于待办事项输入框的用户体验问题。让我用自己的语言复述一下：
 
 ## 当前问题
