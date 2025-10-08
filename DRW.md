@@ -1,3 +1,85 @@
+你对绝对路径的理解是正确的，但关于如何操作，我有更推荐的做法。让我来详细解释一下。
+
+### 1. `/kaggle/input` 是绝对路径吗？
+
+**是的，完全正确。**
+
+在类 Unix 系统（如 Linux、macOS）中，以斜杠 `/` 开头的路径是**绝对路径**，它表示从文件系统的**根目录**开始。Kaggle 的运行环境（Docker 容器）是基于 Linux 的，所以 `/kaggle/input` 指的是其文件系统根目录下的 `kaggle` 文件夹，再里面的 `input` 文件夹。
+
+在 Windows 系统上，根目录通常是 `C:\` 或 `D:\` 这样的盘符。
+
+### 2. 我应该在根目录创建 `kaggle` 文件夹吗？
+
+**理论上可以，但强烈不推荐！**
+
+你的理解是准确的：要在本地完全模拟 Kaggle 的路径，你需要在你的系统根目录（比如 `C:\`）下创建 `C:\kaggle\input`。
+
+**为什么不推荐这么做：**
+
+*   **权限问题**：在现代操作系统中，直接在根目录（如 `C:\`）创建文件夹通常需要管理员权限，这会带来不必要的麻烦和潜在的安全风险。
+*   **污染系统**：这会把项目特定的数据文件散布到你的系统盘中，让你的系统根目录变得混乱。
+*   **可移植性差**：如果有一天你把这个项目代码发给同事，或者换一台电脑，对方也必须在根目录下创建完全相同的文件夹结构，否则代码就无法运行。这使得项目非常不灵活。
+
+### 3. 修正和补充意见（最佳实践）
+
+最好的方法是让你的项目**自包含（self-contained）**，也就是说，所有需要的文件都放在你的项目文件夹内部，并使用**相对路径**来引用它们。
+
+**具体步骤：**
+
+1.  **在你的项目文件夹内创建数据目录**：
+    在你的项目路径 `E:\Python Code\DRW\` 下面，创建一个新的文件夹，可以叫 `input`、`data` 或者任何你喜欢的名字。
+    ```
+    E:\Python Code\DRW\
+    ├── DRW\
+    │   ├── 0.102.ipynb
+    │   └── ...
+    └── input\      <-- 在这里创建新文件夹
+        ├── train.parquet
+        ├── test.parquet
+        └── sample_submission.csv
+    ```
+
+2.  **修改代码中的路径为相对路径**：
+    找到代码中所有引用 `/kaggle/input` 的地方，把它们改成指向你刚刚创建的文件夹的**相对路径**。对于这个 Notebook，主要修改 `CFG` 类即可。
+
+    **修改前**:
+    ```python
+    class CFG:
+        train_path = "/kaggle/input/drw-crypto-market-prediction/train.parquet"
+        test_path = "/kaggle/input/drw-crypto-market-prediction/test.parquet"
+        sample_sub_path = "/kaggle/input/drw-crypto-market-prediction/sample_submission.csv"
+    ```
+    (注意：这个 Notebook 里的路径还包含了比赛名字的子文件夹)
+
+    **修改后** (假设你把数据直接放在 `input` 文件夹里):
+    ```python
+    class CFG:
+        train_path = "../input/train.parquet"  # 使用 ../ 返回上一级目录
+        test_path = "../input/test.parquet"
+        sample_sub_path = "../input/sample_submission.csv"
+    ```
+    或者，如果你把 Notebook 和 `input` 文件夹放在同一级，路径就是：
+    ```python
+    class CFG:
+        train_path = "input/train.parquet"
+        test_path = "input/test.parquet"
+        sample_sub_path = "input/sample_submission.csv"
+    ```
+
+**总结**：
+你的理解是准确的，但为了代码的整洁、可维护性和可移植性，**永远优先使用相对于项目根目录的相对路径**，而不是去模拟一个写死的绝对路径。这是一个非常好的编程习惯。
+没错，理解得非常准确！
+
+- 这份 Notebook 原本就是在 Kaggle 的运行环境里执行的，那是一个基于 Linux 的容器，系统根目录下已经帮你准备好了 `/kaggle/input` 这种固定的路径结构。
+- 你现在换到 Windows 环境，文件系统不一样，就需要把原来写死的路径（比如 `/kaggle/input/...`）改成你本地的实际位置，通常推荐用相对路径，像 `input/train.parquet`。
+
+建议：
+- 把 Kaggle 数据下载下来放进项目目录里的某个文件夹。
+- 改掉代码里所有引用 `/kaggle/input` 的地方，串成你自己能访问到的路径。
+
+这样 Notebook 才能在本地正常运行。
+
+
 非常棒的提问！你已经触及到了现代量化交易最核心的理念之一。
 
 **您的理解：“主流的量化公司他们做的量化模型，模型的核心任务就是准确地预测这个价格变动方向，而不是去预测价格的数值。”**
